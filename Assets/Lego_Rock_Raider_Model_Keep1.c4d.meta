@@ -1,0 +1,217 @@
+fileFormatVersion: 2
+guid: 8aaf866c0643db04ab25abd53443f8d9
+timeCreated: 1503065798
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: Body
+    100002: Camera
+    100004: Cube
+    100006: Head
+    100008: HyperNURBS
+    100010: HyperNURBS_2
+    100012: L_Arm
+    100014: Lego_Man
+    100016: Lego_Man_1_Arm_L
+    100018: Lego_Man_1_Arm_R
+    100020: Lego_Man_1_Crotch
+    100022: Lego_Man_1_Hand_L
+    100024: Lego_Man_1_Hand_R
+    100026: Lego_Man_1_Leg_hinge
+    100028: Lego_Man_1_Leg_L
+    100030: Lego_Man_1_Leg_R
+    100032: Lego_Rock_Raider
+    100034: //RootNode
+    100036: R_Arm
+    100038: Waist
+    100040: CINEMA_4D_Editor
+    400000: Body
+    400002: Camera
+    400004: Cube
+    400006: Head
+    400008: HyperNURBS
+    400010: HyperNURBS_2
+    400012: L_Arm
+    400014: Lego_Man
+    400016: Lego_Man_1_Arm_L
+    400018: Lego_Man_1_Arm_R
+    400020: Lego_Man_1_Crotch
+    400022: Lego_Man_1_Hand_L
+    400024: Lego_Man_1_Hand_R
+    400026: Lego_Man_1_Leg_hinge
+    400028: Lego_Man_1_Leg_L
+    400030: Lego_Man_1_Leg_R
+    400032: Lego_Rock_Raider
+    400034: //RootNode
+    400036: R_Arm
+    400038: Waist
+    400040: CINEMA_4D_Editor
+    2300000: Body
+    2300002: Cube
+    2300004: Head
+    2300006: Lego_Man_1_Arm_L
+    2300008: Lego_Man_1_Arm_R
+    2300010: Lego_Man_1_Crotch
+    2300012: Lego_Man_1_Hand_L
+    2300014: Lego_Man_1_Hand_R
+    2300016: Lego_Man_1_Leg_hinge
+    2300018: Lego_Man_1_Leg_L
+    2300020: Lego_Man_1_Leg_R
+    2300022: Waist
+    3300000: Body
+    3300002: Cube
+    3300004: Head
+    3300006: Lego_Man_1_Arm_L
+    3300008: Lego_Man_1_Arm_R
+    3300010: Lego_Man_1_Crotch
+    3300012: Lego_Man_1_Hand_L
+    3300014: Lego_Man_1_Hand_R
+    3300016: Lego_Man_1_Leg_hinge
+    3300018: Lego_Man_1_Leg_L
+    3300020: Lego_Man_1_Leg_R
+    3300022: Waist
+    4300000: Waist
+    4300002: Cube
+    4300004: Body
+    4300006: Lego_Man_1_Leg_R
+    4300008: Lego_Man_1_Leg_L
+    4300010: Lego_Man_1_Crotch
+    4300012: Lego_Man_1_Leg_hinge
+    4300014: Lego_Man_1_Arm_R
+    4300016: Lego_Man_1_Hand_R
+    4300018: Lego_Man_1_Arm_L
+    4300020: Lego_Man_1_Hand_L
+    4300022: Head
+    7400000: Walking
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Walking
+      takeName: Main
+      firstFrame: 0
+      lastFrame: 60
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: CINEMA_4D_Editor
+        weight: 1
+      - path: Lego_Rock_Raider
+        weight: 1
+      - path: Lego_Rock_Raider/Head
+        weight: 1
+      - path: Lego_Rock_Raider/HyperNURBS
+        weight: 1
+      - path: Lego_Rock_Raider/HyperNURBS/Waist
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/HyperNURBS_2
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/HyperNURBS_2/Cube
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/L_Arm
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/L_Arm/Lego_Man_1_Arm_L
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/L_Arm/Lego_Man_1_Hand_L
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/Lego_Man_1_Crotch
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/Lego_Man_1_Leg_hinge
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/Lego_Man_1_Leg_L
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/Lego_Man_1_Leg_R
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/R_Arm
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/R_Arm/Lego_Man_1_Arm_R
+        weight: 1
+      - path: Lego_Rock_Raider/Lego_Man/R_Arm/Lego_Man_1_Hand_R
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.01
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
