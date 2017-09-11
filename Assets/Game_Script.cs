@@ -344,6 +344,9 @@ public class Game_Script : MonoBehaviour
 
 	public void OnDestroyRock(GridPos rock)
 	{
+
+		this.GetComponent<System_Script>().OnRockDestroyed(rock.gameObj);
+
 		// destroy current rock
 		EraseRock(rock.X, rock.Y);
 
@@ -354,6 +357,7 @@ public class Game_Script : MonoBehaviour
 		var MaxY = rock.Y + 2;
 
 		ResetRockMeshes(MinX, MaxX, MinY, MaxY);
+
 	}
 
 	/// <summary>

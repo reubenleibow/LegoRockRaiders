@@ -40,6 +40,7 @@ public partial class System_Script : MonoBehaviour
 
 	void Update()
 	{
+
 		SelectObjects();
 
 		foreach (var obj in AllSelectableGameObjects)
@@ -142,6 +143,9 @@ public partial class System_Script : MonoBehaviour
 		if(Input.GetMouseButtonDown(1))
 		{
 			Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out dest);
+
+			OnRightClick(dest);
+
 			var destination = dest.point;
 
 			Debug.Log(dest.collider.gameObject);
@@ -191,14 +195,70 @@ public partial class System_Script : MonoBehaviour
 
 	public void OnClickAnyGameObject(RaycastHit obj)
 	{
-		if (obj.collider.transform.tag == "Rock")
-		{
-			var rockParent = obj.collider.gameObject.transform.parent.gameObject;
-			//var rockChild = obj.collider.gameObject;
-			Game_Script.OnDestroyRock(rockParent.GetComponent<Rock_Script>().RockProperties);
+		//if (obj.collider.transform.tag == "Rock")
+		//{
+		//	var rockParent = obj.collider.gameObject.transform.parent.gameObject;
+		//	Game_Script.OnDestroyRock(rockParent.GetComponent<Rock_Script>().RockProperties);
+		//
+		//	Debug.Log(rockParent);
+		//}
+	}
 
-			Debug.Log(rockParent);
-			//Destroy(rockParent);
+	public void OnRightClick(RaycastHit Point)
+	{
+
+		var Taskable = Point.transform.tag == "Rock" || Point.transform.tag == "Crystal";
+
+		if (Taskable)
+		{
+			var Object_ = Point.collider.gameObject.transform.parent.gameObject;
+			var Drillable = false;
+
+			if (Point.transform.tag == "Rock")
+			{
+				var Rock_Type = Object_.GetComponent<Rock_Script>().RockProperties.RockType;
+
+				Drillable = (Rock_Type == RockType.LooseRock || Rock_Type == RockType.SoftRock || Rock_Type == RockType.HardRock);
+			}
+
+			foreach (var Unit in SelectedGameObjects)
+			{
+				var Unit_ = Unit.GetComponent<Lego_Character>();
+				var NavMesh = Unit.GetComponent<NavMeshAgent>();
+
+				Unit_.TaskObject = Object_;
+
+				if (Point.transform.tag == "Rock")
+				{
+					if (Unit_.CanDrill && Drillable)
+					{
+						Unit_.CurrentTask = CurrentJob.WalkingToDrill;
+						Unit_.DistFromJob = float.MaxValue;
+					}
+				}
+
+				if (Point.transform.tag == "Crystal" && Object_.GetComponent<Collectable>().Collector == null)
+				{
+					Unit_.CurrentTask = CurrentJob.WalkToCrystal;
+					Unit_.DistFromJob = float.MaxValue;
+					Object_.GetComponent<Collectable>().Collector = Unit_.gameObject;
+				}
+
+				NavMesh.SetDestination(Object_.transform.position);
+			}
+		}
+	}
+
+	public void OnRockDestroyed(GameObject Rock)
+	{
+		foreach(var Unit in RaidersList)
+		{
+			if(Unit.GetComponent<Lego_Character>().TaskObject == Rock)
+			{
+				Unit.GetComponent<Lego_Character>().TaskObject = null;
+				Unit.GetComponent<Lego_Character>().CurrentTask = CurrentJob.Nothing;
+
+			}
 		}
 	}
 }
