@@ -8,6 +8,7 @@ public partial class System_Script : MonoBehaviour
 {
 	public static List<SelectCode> AllSelectableGameObjects = new List<SelectCode>();
 	public static List<SelectCode> SelectedGameObjects = new List<SelectCode>();
+	public static List<GameObject> ListOfAllToolStores = new List<GameObject>();
 	public List<Image> Images = new List<Image>();
 	public GameObject ParentImage;
 	public static List<GameObject> RaidersList = new List<GameObject>();
@@ -31,6 +32,10 @@ public partial class System_Script : MonoBehaviour
 	public int CurrentMenuBarNumber = 3;
 	public Game_Script Game_Script;
 
+	public int CrystalsCollectedCart = 0;
+	public int OreCollectedCart = 0;
+
+
 
 	void Start()
 	{
@@ -40,7 +45,6 @@ public partial class System_Script : MonoBehaviour
 
 	void Update()
 	{
-
 		SelectObjects();
 
 		foreach (var obj in AllSelectableGameObjects)
@@ -57,7 +61,7 @@ public partial class System_Script : MonoBehaviour
 			}
 		}
 
-		if(MaxRaiders <= RaidersList.Count)
+		if (MaxRaiders <= RaidersList.Count)
 		{
 			CreateMan_Icon.interactable = false;
 		}
@@ -70,18 +74,17 @@ public partial class System_Script : MonoBehaviour
 
 		for (int i = 0; i < Menus.Count; i++)
 		{
-			Menus[i].SetActive(i == CurrentMenuBarNumber-1);
+			Menus[i].SetActive(i == CurrentMenuBarNumber - 1);
 		}
 
-		if(SelectedGameObjects.Count > 0)
+		if (SelectedGameObjects.Count > 0)
 		{
 			CurrentMenuBarNumber = 2;
 		}
-		else if(CurrentMenuBarNumber == 2)
+		else if (CurrentMenuBarNumber == 2)
 		{
 			CurrentMenuBarNumber = 1;
 		}
-
 
 		//if(SelectedGameObjects.Count == 1)
 		//{
@@ -127,7 +130,7 @@ public partial class System_Script : MonoBehaviour
 				var point = Camera.main.WorldToScreenPoint(obj.transform.position);
 				var contains = minX < point.x && minY < point.y && maxX > point.x && maxY > point.y;
 
-				if(obj.Selectable)
+				if (obj.Selectable)
 				{
 					obj.IsSelected = contains;
 				}
@@ -140,7 +143,7 @@ public partial class System_Script : MonoBehaviour
 		//moving the unit to the destination;
 		RaycastHit dest;
 
-		if(Input.GetMouseButtonDown(1))
+		if (Input.GetMouseButtonDown(1))
 		{
 			Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out dest);
 
@@ -177,7 +180,7 @@ public partial class System_Script : MonoBehaviour
 	//create raiders
 	public void OnClick_CreateMan()
 	{
-		if((CreateRaiderQue + RaidersList.Count) < MaxRaiders)
+		if ((CreateRaiderQue + RaidersList.Count) < MaxRaiders)
 		{
 			CreateRaiderQue++;
 		}
@@ -207,11 +210,22 @@ public partial class System_Script : MonoBehaviour
 	public void OnRightClick(RaycastHit Point)
 	{
 
-		var Taskable = Point.transform.tag == "Rock" || Point.transform.tag == "Crystal";
+		var Taskable = Point.transform.tag == "Rock" || Point.transform.tag == "Crystal" || Point.transform.tag == "Ore";
+
+		foreach (var Unit in SelectedGameObjects)
+		{
+			var Unit_ = Unit.GetComponent<Lego_Character>();
+
+			if (Unit_.Items.Count > 0)
+			{
+				Unit_.CurrentTask = CurrentJob.WanderAroungWithItem;
+			}
+		}
 
 		if (Taskable)
 		{
 			var Object_ = Point.collider.gameObject.transform.parent.gameObject;
+			var Collectable = Object_.GetComponent<Collectable>();
 			var Drillable = false;
 
 			if (Point.transform.tag == "Rock")
@@ -220,6 +234,12 @@ public partial class System_Script : MonoBehaviour
 
 				Drillable = (Rock_Type == RockType.LooseRock || Rock_Type == RockType.SoftRock || Rock_Type == RockType.HardRock);
 			}
+
+			if ((Point.transform.tag == "Crystal" || Point.transform.tag == "Ore"))
+			{
+				Collectable.HostChanged = false;
+			}
+
 
 			foreach (var Unit in SelectedGameObjects)
 			{
@@ -237,28 +257,63 @@ public partial class System_Script : MonoBehaviour
 					}
 				}
 
-				if (Point.transform.tag == "Crystal" && Object_.GetComponent<Collectable>().Collector == null)
+
+
+				var collectable = Object_.GetComponent<Collectable>();
+
+				if ((Point.transform.tag == "Crystal" || Point.transform.tag == "Ore"))
 				{
-					Unit_.CurrentTask = CurrentJob.WalkToCrystal;
-					Unit_.DistFromJob = float.MaxValue;
-					Object_.GetComponent<Collectable>().Collector = Unit_.gameObject;
+
+					if (collectable.HostChanged == false)
+					{
+						//If unit has an item in its hand then drop it.
+						if (Unit_.Items.Count > 0)
+						{
+							Unit_.Items[0].GetComponent<Collectable>().DropItem();
+							Unit_.Items.Clear();
+						}
+
+						Unit_.CurrentTask = CurrentJob.WalkToCollectable;
+						Unit_.DistFromJob = float.MaxValue;
+						collectable.Collector = Unit_.gameObject;
+
+						if (Point.transform.tag == "Crystal")
+						{
+							Unit_.ItemType = CollectableType.Crystal;
+						}
+
+						if (Point.transform.tag == "Ore")
+						{
+							Unit_.ItemType = CollectableType.Ore;
+						}
+
+
+						//Set host changed to true
+						collectable.HostChanged = true;
+					}
 				}
 
 				NavMesh.SetDestination(Object_.transform.position);
 			}
 		}
+		else
+		{
+
+		}
 	}
 
 	public void OnRockDestroyed(GameObject Rock)
 	{
-		foreach(var Unit in RaidersList)
+		foreach (var Unit in RaidersList)
 		{
-			if(Unit.GetComponent<Lego_Character>().TaskObject == Rock)
-			{
-				Unit.GetComponent<Lego_Character>().TaskObject = null;
-				Unit.GetComponent<Lego_Character>().CurrentTask = CurrentJob.Nothing;
+			var character = Unit.GetComponent<Lego_Character>();
 
+			if (character.TaskObject == Rock)
+			{
+				character.TaskObject = null;
+				character.CurrentTask = CurrentJob.Nothing;
+				
 			}
-		}
+		}		
 	}
 }
