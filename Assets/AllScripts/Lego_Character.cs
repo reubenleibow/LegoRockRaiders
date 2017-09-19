@@ -18,7 +18,8 @@ public enum TaskChassis
 {
 	GatherOre,
 	GatherCrystals,
-	Nothing
+	Nothing,
+	JWalking
 }
 
 public enum ExtraCommands
@@ -42,7 +43,7 @@ public static class Constants
 /// </summary>
 public class Lego_Character : MonoBehaviour
 {
-	private SelectCode SelectCode;
+	//private SelectCode SelectCode;
 	private GameObject Parent;
 	public GameObject CollectionSpace;
 
@@ -71,23 +72,32 @@ public class Lego_Character : MonoBehaviour
 	void Start()
 	{
 		Parent = this.gameObject;
-		SelectCode = GetComponent<SelectCode>();
+		//SelectCode = GetComponent<SelectCode>();
 		//System_Script.RaidersList.Add(this.gameObject);
 		SystemSrpt = GameObject.Find("System").GetComponent<System_Script>();
 	}
 
 	void Update()
 	{
+		//if the user says that it has an item in hand but it does not the set defalut
 		if(Items.Count == 0 && ItemType != CollectableType.Nothing)
 		{
 			ItemType = CollectableType.Nothing;
 		}
 
-		if(DistFromJob > 2)
+		//doing nothing than find an obnject
+		if(CurrentTask == CurrentJob.Nothing && TaskChassis == TaskChassis.Nothing)
+		{
+			SetNextJob();
+		}
+
+		//arrived at a target
+		if(this.GetComponent<NavMeshAgent>().remainingDistance > 2)
 		{
 			Arrived = false;
 		}
 
+		//detecting if the rock that the raider must mine is in range using ray caster method
 		if (TaskObject != null)
 		{
 			var Ray = Physics.Linecast(new Vector3(this.transform.position.x, 1, this.transform.position.z),
@@ -100,7 +110,7 @@ public class Lego_Character : MonoBehaviour
 			if (Ray)
 			{
 				var TagName = TaskPoint.collider.gameObject.transform.tag;
-				var HasParent = TagName == "Rock" || TagName == "Crystal";
+				var HasParent = TagName == "Rock";
 
 				//only tag neededs to be edited
 				if (HasParent)
@@ -126,11 +136,11 @@ public class Lego_Character : MonoBehaviour
 				StartDrilling();
 			}
 
-			//sIMULATE pickups
-			if (CurrentTask == CurrentJob.WalkToCollectable && DistFromJob <= Constants.MinDrillDistance)
+			//arrived at crystal and pick it up.
+			if (CurrentTask == CurrentJob.WalkToCollectable && TaskObject != null && DistFromJob <= Constants.MinDrillDistance)
 			{
-				if(TaskObject.GetComponent<Collectable>().Collector == this.gameObject)
-				PickUpCollectable();
+				if (TaskObject.GetComponent<Collectable>().Collector == this.gameObject)
+					PickUpCollectable();
 			}
 
 			if (CurrentTask == CurrentJob.Drilling)
@@ -138,14 +148,18 @@ public class Lego_Character : MonoBehaviour
 				Drilling();
 			}
 
+			//place collectable at base
 			if (CurrentTask == CurrentJob.DropOffCollectable)
 			{
-				var distance = Vector3.Distance(this.transform.position, TaskObject.transform.position);
-
-				if (distance <= 2)
+				if(TaskObject != null)
 				{
-					CurrentTask = CurrentJob.PutCollectableDownAtCentre;
-					PutCollectableDownAtBase();
+					var distance = Vector3.Distance(this.transform.position, TaskObject.transform.position);
+
+					if (distance <= 2)
+					{
+						CurrentTask = CurrentJob.PutCollectableDownAtCentre;
+						PutCollectableDownAtBase();
+					}
 				}
 			}
 		}
@@ -158,8 +172,6 @@ public class Lego_Character : MonoBehaviour
 		{
 			Parent.GetComponent<SelectCode>().Selectable = true;
 		}
-
-
 
 		if(Arrived == false && this.GetComponent<NavMeshAgent>().remainingDistance < 2)
 		{
@@ -190,7 +202,6 @@ public class Lego_Character : MonoBehaviour
 
 	public void FindNearestCollectableDropOff()
 	{
-
 		if(ItemType == CollectableType.Crystal)
 		{
 			var shortestPath = this.ShortestPath(System_Script.AllBuildings, ExtraCommands.ReturnCrystal);
@@ -203,12 +214,10 @@ public class Lego_Character : MonoBehaviour
 			GetComponent<NavMeshAgent>().SetPath(shortestPath);
 		}
 
-		//if(shortestPath != null)
-		//{
 		CurrentTask = CurrentJob.DropOffCollectable;
-		//}
 	}
 
+	//put crystal away
 	public void PutCollectableDownAtBase()
 	{
 		CurrentTask = CurrentJob.Nothing;
@@ -216,45 +225,80 @@ public class Lego_Character : MonoBehaviour
 		if(Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Crystal)
 		{
 			SystemSrpt.CrystalsCollectedCart++;
+			TaskChassis = TaskChassis.GatherCrystals;
 		}
 
 		if (Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Ore)
 		{
 			SystemSrpt.OreCollectedCart++;
+			TaskChassis = TaskChassis.GatherOre;
 		}
 
 		Destroy(Items[0]);
 		Items.Clear();
 
-		//Once collectable is gone then pick up new crystal
-		if (TaskChassis == TaskChassis.GatherOre)
-			FindAndCollectOre();
-
-		if (TaskChassis == TaskChassis.GatherCrystals)
-			FindAndCollectCrystal();
+		TaskChassis = TaskChassis.Nothing;
 	}
 
 	public void ArrivedAtDest()
 	{
-		if(CurrentTask == CurrentJob.WanderAroungWithItem && ItemType != CollectableType.Nothing)
+		var run = true;
+
+		//if the player is wandering with an Item in hand and has reched the end of its journey set by player then find a place to drop it off
+		if(CurrentTask == CurrentJob.WanderAroungWithItem && ItemType != CollectableType.Nothing && run)
 		{
 			FindNearestCollectableDropOff();
 			CurrentTask = CurrentJob.DropOffCollectable;
+			run = false;
+		}
+
+		//if the player is jwalking and has no task then find a job once arrived
+		if (TaskChassis == TaskChassis.JWalking && run && CurrentTask == CurrentJob.Nothing)
+		{
+			TaskChassis = TaskChassis.Nothing;
+			run = false;
+		}
+	}
+
+	// this must be set by priorities
+	public void SetNextJob() 
+	{
+		if(System_Script.AllCrystals.Count >0)
+		{
+			if (TaskChassis == TaskChassis.GatherCrystals || TaskChassis == TaskChassis.Nothing)
+				FindAndCollectCrystal();
+		}
+		else
+		{
+			TaskChassis = TaskChassis.GatherOre;
+		}
+
+		if (System_Script.AllOre.Count > 0)
+		{
+			if (TaskChassis == TaskChassis.GatherOre)
+				FindAndCollectOre();
 		}
 	}
 
 	public void FindAndCollectOre()
 	{
 		var shortestPath = this.ShortestPath(System_Script.AllOre,ExtraCommands.FindUnTargeted);
-		GetComponent<NavMeshAgent>().SetPath(shortestPath);
-		StartCollecting();
+
+		if (shortestPath.Length != float.MaxValue)
+		{
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+			StartCollecting();
+		}
 	}
 
 	public void FindAndCollectCrystal()
 	{
 		var shortestPath = this.ShortestPath(System_Script.AllCrystals, ExtraCommands.FindUnTargeted);
-		GetComponent<NavMeshAgent>().SetPath(shortestPath);
-		StartCollecting();
+		if (shortestPath.Length != float.MaxValue)
+		{
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+			StartCollecting();
+		}
 
 	}
 

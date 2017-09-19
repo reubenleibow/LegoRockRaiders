@@ -34,6 +34,36 @@ public class Collectable : MonoBehaviour {
 	{
 		if (CollectedCart != null)
 			this.transform.position = CollectedCart.transform.position;
+
+		if (Collector != null)
+		{
+			var collectorS = Collector.GetComponent<Lego_Character>();
+			var Contains = false;
+
+			if (collectorS.Items.Count > 0)
+			{
+				for(var i = 0; i < collectorS.Items.Count; i++)
+				{
+					if(collectorS.Items[i] == this.gameObject)
+					{
+						Contains = true;
+					}
+				}
+			}
+			else
+			{
+				if (collectorS.TaskObject == this.gameObject)
+				{
+					Contains = true;
+				}
+			}
+
+			if(!Contains)
+			{
+				Collector = null;
+				CollectedCart = null;
+			}
+		}
 	}
 
 	public void DropItem()
@@ -49,5 +79,11 @@ public class Collectable : MonoBehaviour {
 
 		if (CollectableType == CollectableType.Ore)
 			System_Script.AllOre.Remove(this.gameObject);
+	}
+	
+	public void ClearAllCollectors()
+	{
+		Collector.GetComponent<Lego_Character>().CurrentTask = CurrentJob.Nothing;
+		Collector.GetComponent<Lego_Character>().TaskObject = null;
 	}
 }

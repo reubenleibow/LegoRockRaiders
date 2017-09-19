@@ -158,8 +158,6 @@ public partial class System_Script : MonoBehaviour
 
 			var destination = dest.point;
 
-			Debug.Log(dest.collider.gameObject);
-
 			OnClickAnyGameObject(dest);
 
 			foreach (var obj in SelectedGameObjects)
@@ -216,12 +214,14 @@ public partial class System_Script : MonoBehaviour
 
 	public void OnRightClick(RaycastHit Point)
 	{
-
 		var Taskable = Point.transform.tag == "Rock" || Point.transform.tag == "Crystal" || Point.transform.tag == "Ore";
 
+		//Remove all tasked objects
 		foreach (var Unit in SelectedGameObjects)
 		{
 			var Unit_ = Unit.GetComponent<Lego_Character>();
+
+			Unit_.TaskObject = null;
 
 			if (Unit_.Items.Count > 0)
 			{
@@ -242,6 +242,7 @@ public partial class System_Script : MonoBehaviour
 				Drillable = (Rock_Type == RockType.LooseRock || Rock_Type == RockType.SoftRock || Rock_Type == RockType.HardRock);
 			}
 
+			//part(1/3)
 			if ((Point.transform.tag == "Crystal" || Point.transform.tag == "Ore"))
 			{
 				Collectable.HostChanged = false;
@@ -252,8 +253,6 @@ public partial class System_Script : MonoBehaviour
 			{
 				var Unit_ = Unit.GetComponent<Lego_Character>();
 				var NavMesh = Unit.GetComponent<NavMeshAgent>();
-
-				Unit_.TaskObject = Object_;
 
 				if (Point.transform.tag == "Rock")
 				{
@@ -266,22 +265,34 @@ public partial class System_Script : MonoBehaviour
 
 				var collectable = Object_.GetComponent<Collectable>();
 
+				//part(2/3)
 				if ((Point.transform.tag == "Crystal" || Point.transform.tag == "Ore"))
 				{
 
+					//new host not been set
 					if (collectable.HostChanged == false)
 					{
-						//If unit has an item in its hand then drop it.
+						Unit_.TaskObject = Object_;
+
+						//if another raider is going for it then make that raider drop it
+						if(collectable.Collector != null)
+						{
+							collectable.ClearAllCollectors();
+						}
+
+						//If unit has an item in its hand then drop it.(edit here to make for multiple)
 						if (Unit_.Items.Count > 0)
 						{
 							Unit_.Items[0].GetComponent<Collectable>().DropItem();
 							Unit_.Items.Clear();
 						}
 
+						//set some values
 						Unit_.CurrentTask = CurrentJob.WalkToCollectable;
 						Unit_.DistFromJob = float.MaxValue;
 						collectable.Collector = Unit_.gameObject;
 
+						//part(3/3)
 						if (Point.transform.tag == "Crystal")
 						{
 							Unit_.ItemType = CollectableType.Crystal;
@@ -294,10 +305,11 @@ public partial class System_Script : MonoBehaviour
 							Unit_.TaskChassis = TaskChassis.GatherOre;
 						}
 
-
 						//Set host changed to true
 						collectable.HostChanged = true;
 					}
+
+					Unit_.TaskChassis = TaskChassis.JWalking;
 				}
 
 				NavMesh.SetDestination(Object_.transform.position);

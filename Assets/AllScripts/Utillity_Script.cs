@@ -30,8 +30,6 @@ public static class Utillity_Script
 
 	public static NavMeshPathEx CalculatePath(this Lego_Character character, GameObject destination)
 	{
-		//return CalculatePath(character.GetComponent<NavMeshAgent>(), destination);
-
 		var path = new NavMeshPath();
 		var dist = Vector3.Distance(character.transform.position,destination.transform.position);
 		character.GetComponent<NavMeshAgent>().CalculatePath(destination.transform.position, path);
@@ -51,12 +49,8 @@ public static class Utillity_Script
 
 		if (ExtraCommands == ExtraCommands.ReturnCrystal)
 		{
-			Debug.Log(ExtraCommands);
-
 			if (destination.GetComponent<Building_Script>().CanTakeCrystal)
 			{
-				Debug.Log(destination);
-
 				return CalculatePath(character, destination);
 			}
 		}
@@ -69,6 +63,7 @@ public static class Utillity_Script
 			}
 		}
 
+		//find the nearsest collectable that is not being collected or to be collected by a different user
 		if (ExtraCommands == ExtraCommands.FindUnTargeted)
 		{
 			if (destination.GetComponent<Collectable>().Collector == null)
@@ -117,44 +112,18 @@ public static class Utillity_Script
 		return shortest;
 	}
 
-	//public static NavMeshPathEx ShortestPath(this Lego_Character LegoUnit, List<GameObject> listOfGameObjects, bool Specific)
-	//{
-	//	// get all the paths
-	//	var results = listOfGameObjects.Select(dest => LegoUnit.CalculatePath(dest, Specific));
-	//
-	//	// get the shortest path after sorting (shortest at the top)
-	//	var shortest = results.OrderBy(r => r.Length).FirstOrDefault();
-	//
-	//	// get the actual mesh path
-	//	return shortest;
-	//}
-
 	public static NavMeshPathEx ShortestPath(this Lego_Character LegoUnit, List<GameObject> listOfGameObjects, ExtraCommands ExtraCommands)
 	{
 		var results = listOfGameObjects.Select(dest => LegoUnit.CalculatePath(dest, ExtraCommands));
 		var shortest = results.OrderBy(r => r.Length).FirstOrDefault();
 
-		if(ExtraCommands == ExtraCommands.FindUnTargeted)
+		//make sure that the length of the closest object is not max(could be a fake route)
+		if(ExtraCommands == ExtraCommands.FindUnTargeted && shortest.Object.GetComponent<Collectable>().Collector == null && shortest.Length != float.MaxValue)
 		{
-			//LegoUnit.TaskObject = shortest.Object;
 			shortest.Object.GetComponent<Collectable>().Collector = LegoUnit.gameObject;
 		}
 
-		if (ExtraCommands == ExtraCommands.ReturnCrystal || ExtraCommands == ExtraCommands.ReturnOre)
-		{
-		}
-
-		Debug.Log(shortest);
-
-
-		//LegoUnit.TaskObject = shortest.Object;
 		return shortest;
-		//return new NavMeshPathEx
-		//{
-		//	NavPath = new NavMeshPath(),
-		//	Length = float.MaxValue,
-		//	Object = null
-		//};
 	}
 
 	public static void SetPath(this NavMeshAgent character, NavMeshPathEx path)
