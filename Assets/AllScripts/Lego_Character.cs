@@ -14,12 +14,20 @@ public enum CurrentJob
 	WanderAroungWithItem
 }
 
-//public enum ItemType
-//{
-//	Crystal,
-//	Ore,
-//	Nothing
-//}
+public enum TaskChassis
+{
+	GatherOre,
+	GatherCrystals,
+	Nothing
+}
+
+public enum ExtraCommands
+{
+	FindUnTargeted,
+	Nothing,
+	ReturnCrystal,
+	ReturnOre,
+}
 
 
 public static class Constants
@@ -52,6 +60,8 @@ public class Lego_Character : MonoBehaviour
 	public GameObject TaskObject;
 	public CurrentJob CurrentTask;
 	public RaycastHit TaskPoint;
+	public TaskChassis TaskChassis = TaskChassis.Nothing;
+	public ExtraCommands ExtraCommands = ExtraCommands.Nothing;
 
 	public CollectableType ItemType;
 
@@ -116,14 +126,27 @@ public class Lego_Character : MonoBehaviour
 				StartDrilling();
 			}
 
+			//sIMULATE pickups
 			if (CurrentTask == CurrentJob.WalkToCollectable && DistFromJob <= Constants.MinDrillDistance)
 			{
+				if(TaskObject.GetComponent<Collectable>().Collector == this.gameObject)
 				PickUpCollectable();
 			}
 
 			if (CurrentTask == CurrentJob.Drilling)
 			{
 				Drilling();
+			}
+
+			if (CurrentTask == CurrentJob.DropOffCollectable)
+			{
+				var distance = Vector3.Distance(this.transform.position, TaskObject.transform.position);
+
+				if (distance <= 2)
+				{
+					CurrentTask = CurrentJob.PutCollectableDownAtCentre;
+					PutCollectableDownAtBase();
+				}
 			}
 		}
 
@@ -136,16 +159,7 @@ public class Lego_Character : MonoBehaviour
 			Parent.GetComponent<SelectCode>().Selectable = true;
 		}
 
-		if(CurrentTask == CurrentJob.DropOffCollectable)
-		{
-			var distance = Vector3.Distance(this.transform.position, TaskObject.transform.position);
 
-			if(distance <= 2)
-			{
-				CurrentTask = CurrentJob.PutCollectableDownAtCentre;
-				PutCollectableDownAtBase();
-			}
-		}
 
 		if(Arrived == false && this.GetComponent<NavMeshAgent>().remainingDistance < 2)
 		{
@@ -176,13 +190,23 @@ public class Lego_Character : MonoBehaviour
 
 	public void FindNearestCollectableDropOff()
 	{
-		var shortestPath = this.ShortestPath(System_Script.ListOfAllToolStores);
-		GetComponent<NavMeshAgent>().SetPath(shortestPath);
 
-		if(shortestPath != null)
+		if(ItemType == CollectableType.Crystal)
 		{
-			CurrentTask = CurrentJob.DropOffCollectable;
+			var shortestPath = this.ShortestPath(System_Script.AllBuildings, ExtraCommands.ReturnCrystal);
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
 		}
+
+		if (ItemType == CollectableType.Ore)
+		{
+			var shortestPath = this.ShortestPath(System_Script.AllBuildings, ExtraCommands.ReturnOre);
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+		}
+
+		//if(shortestPath != null)
+		//{
+		CurrentTask = CurrentJob.DropOffCollectable;
+		//}
 	}
 
 	public void PutCollectableDownAtBase()
@@ -200,6 +224,14 @@ public class Lego_Character : MonoBehaviour
 		}
 
 		Destroy(Items[0]);
+		Items.Clear();
+
+		//Once collectable is gone then pick up new crystal
+		if (TaskChassis == TaskChassis.GatherOre)
+			FindAndCollectOre();
+
+		if (TaskChassis == TaskChassis.GatherCrystals)
+			FindAndCollectCrystal();
 	}
 
 	public void ArrivedAtDest()
@@ -210,4 +242,26 @@ public class Lego_Character : MonoBehaviour
 			CurrentTask = CurrentJob.DropOffCollectable;
 		}
 	}
+
+	public void FindAndCollectOre()
+	{
+		var shortestPath = this.ShortestPath(System_Script.AllOre,ExtraCommands.FindUnTargeted);
+		GetComponent<NavMeshAgent>().SetPath(shortestPath);
+		StartCollecting();
+	}
+
+	public void FindAndCollectCrystal()
+	{
+		var shortestPath = this.ShortestPath(System_Script.AllCrystals, ExtraCommands.FindUnTargeted);
+		GetComponent<NavMeshAgent>().SetPath(shortestPath);
+		StartCollecting();
+
+	}
+
+	public void StartCollecting()
+	{
+		CurrentTask = CurrentJob.WalkToCollectable;
+		DistFromJob = float.MaxValue;
+	}
+
 }

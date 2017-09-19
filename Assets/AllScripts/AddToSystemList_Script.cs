@@ -6,6 +6,7 @@ public class AddToSystemList_Script : MonoBehaviour {
 	public bool IsRaider = false;
 	public bool IsToolStore = false;
 	public bool IsPowerStation = false;
+	public bool IsBuilding = false;
 
 	//public GameObject 
 
@@ -19,8 +20,10 @@ public class AddToSystemList_Script : MonoBehaviour {
 			System_Script.ListOfAllToolStores.Add(this.gameObject);
 
 		if (IsPowerStation)
-			System_Script.ListOfAllToolStores.Add(this.gameObject);
+			System_Script.ListOfAllPowerStations.Add(this.gameObject);
 
+		if (IsBuilding)
+			System_Script.AllBuildings.Add(this.gameObject);
 	}
 	
 	// Update is called once per frame

@@ -48,6 +48,11 @@ public class SelectCode : MonoBehaviour
 		System_Script.AllSelectableGameObjects.Add(this);
 	}
 
+	void OnDestroy()
+	{
+		System_Script.AllSelectableGameObjects.Remove(this);
+	}
+
 	void Update()
 	{
 		GameObjectCoordinates = this.transform.position;

@@ -20,8 +20,13 @@ public class Collectable : MonoBehaviour {
 	public CollectableType CollectableType = CollectableType.Nothing;
 
 	// Use this for initialization
-	void Start () {
-	
+	void Start ()
+	{
+		if (CollectableType == CollectableType.Crystal)
+			System_Script.AllCrystals.Add(this.gameObject);
+
+		if (CollectableType == CollectableType.Ore)
+			System_Script.AllOre.Add(this.gameObject);
 	}
 	
 	// Update is called once per frame
@@ -35,5 +40,14 @@ public class Collectable : MonoBehaviour {
 	{
 		Collector = null;
 		CollectedCart = null;
+	}
+
+	private void OnDestroy()
+	{
+		if(CollectableType == CollectableType.Crystal)
+			System_Script.AllCrystals.Remove(this.gameObject);
+
+		if (CollectableType == CollectableType.Ore)
+			System_Script.AllOre.Remove(this.gameObject);
 	}
 }

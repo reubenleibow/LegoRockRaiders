@@ -9,7 +9,14 @@ public partial class System_Script : MonoBehaviour
 	public static List<SelectCode> AllSelectableGameObjects = new List<SelectCode>();
 	public static List<SelectCode> SelectedGameObjects = new List<SelectCode>();
 	public static List<GameObject> ListOfAllToolStores = new List<GameObject>();
+	public static List<GameObject> ListOfAllPowerStations = new List<GameObject>();
+	public static List<GameObject> AllBuildings = new List<GameObject>();
+	public static List<GameObject> AllCrystals = new List<GameObject>();
+	public static List<GameObject> AllOre = new List<GameObject>();
+
+
 	public List<Image> Images = new List<Image>();
+
 	public GameObject ParentImage;
 	public static List<GameObject> RaidersList = new List<GameObject>();
 
@@ -47,7 +54,7 @@ public partial class System_Script : MonoBehaviour
 	{
 		SelectObjects();
 
-		foreach (var obj in AllSelectableGameObjects)
+		foreach (var obj in AllSelectableGameObjects.ToArray())
 		{
 			var HaveSelectionBox = obj.GetComponent<SelectCode>().HiSelection;
 
@@ -55,7 +62,7 @@ public partial class System_Script : MonoBehaviour
 			if (obj.IsSelected && HaveSelectionBox == null)
 			{
 				var NewImage = Instantiate(HighlightedSelection) as Image;
-				NewImage.transform.parent = ParentImage.transform;
+				NewImage.transform.SetParent(ParentImage.transform);
 				Images.Add(NewImage);
 				obj.GetComponent<SelectCode>().HiSelection = NewImage;
 			}
@@ -257,8 +264,6 @@ public partial class System_Script : MonoBehaviour
 					}
 				}
 
-
-
 				var collectable = Object_.GetComponent<Collectable>();
 
 				if ((Point.transform.tag == "Crystal" || Point.transform.tag == "Ore"))
@@ -280,11 +285,13 @@ public partial class System_Script : MonoBehaviour
 						if (Point.transform.tag == "Crystal")
 						{
 							Unit_.ItemType = CollectableType.Crystal;
+							Unit_.TaskChassis = TaskChassis.GatherCrystals;
 						}
 
 						if (Point.transform.tag == "Ore")
 						{
 							Unit_.ItemType = CollectableType.Ore;
+							Unit_.TaskChassis = TaskChassis.GatherOre;
 						}
 
 
@@ -295,10 +302,6 @@ public partial class System_Script : MonoBehaviour
 
 				NavMesh.SetDestination(Object_.transform.position);
 			}
-		}
-		else
-		{
-
 		}
 	}
 
