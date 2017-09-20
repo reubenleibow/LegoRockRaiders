@@ -11,8 +11,8 @@ public enum CollectableType
 
 public class Collectable : MonoBehaviour {
 
-	public GameObject Collector;
-	public GameObject CollectedCart;
+	public GameObject Collector = null;
+	public GameObject CollectedCart = null;
 	public bool HostChanged = false;
 
 
@@ -27,8 +27,12 @@ public class Collectable : MonoBehaviour {
 
 		if (CollectableType == CollectableType.Ore)
 			System_Script.AllOre.Add(this.gameObject);
+
+
+		//System_Script.CollectableCrystals.Add(this.gameObject);
+
 	}
-	
+
 	// Update is called once per frame
 	void Update ()
 	{
@@ -37,6 +41,22 @@ public class Collectable : MonoBehaviour {
 
 		if (Collector != null)
 		{
+			if (CollectableType == CollectableType.Crystal)
+			{
+				if(System_Script.CollectableCrystals.Contains(this.gameObject))
+				{
+					System_Script.CollectableCrystals.Remove(this.gameObject);
+				}
+			}
+
+			if (CollectableType == CollectableType.Ore)
+			{
+				if (!System_Script.CollectableOre.Contains(this.gameObject))
+				{
+				//	System_Script.CollectableOre.Remove(this.gameObject);
+				}
+			}
+
 			var collectorS = Collector.GetComponent<Lego_Character>();
 			var Contains = false;
 
@@ -56,12 +76,34 @@ public class Collectable : MonoBehaviour {
 				{
 					Contains = true;
 				}
+
+
 			}
 
 			if(!Contains)
 			{
 				Collector = null;
 				CollectedCart = null;
+			}
+		}
+
+		if (Collector == null)
+		{ 
+			if (CollectableType == CollectableType.Crystal)
+			{
+
+				if (!System_Script.CollectableCrystals.Contains(this.gameObject))
+				{
+					System_Script.CollectableCrystals.Add(this.gameObject);
+				}
+			}
+
+			if (CollectableType == CollectableType.Ore)
+			{
+				if (!System_Script.CollectableOre.Contains(this.gameObject))
+				{
+					System_Script.CollectableOre.Add(this.gameObject);
+				}
 			}
 		}
 	}
@@ -75,15 +117,26 @@ public class Collectable : MonoBehaviour {
 	private void OnDestroy()
 	{
 		if(CollectableType == CollectableType.Crystal)
+		{
 			System_Script.AllCrystals.Remove(this.gameObject);
+			System_Script.CollectableCrystals.Remove(this.gameObject);
+
+
+		}
 
 		if (CollectableType == CollectableType.Ore)
+		{
 			System_Script.AllOre.Remove(this.gameObject);
+			System_Script.CollectableOre.Remove(this.gameObject);
+
+
+		}
 	}
 	
 	public void ClearAllCollectors()
 	{
 		Collector.GetComponent<Lego_Character>().CurrentTask = CurrentJob.Nothing;
 		Collector.GetComponent<Lego_Character>().TaskObject = null;
+		Collector.GetComponent<Lego_Character>().TaskChassis = TaskChassis.Nothing;
 	}
 }

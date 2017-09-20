@@ -28,6 +28,7 @@ public class ToolStore_Script : MonoBehaviour {
 			CreatedMan = Instantiate(Raider, CreatePoint.transform.position, Quaternion.identity) as GameObject;
 			CreatedMan.GetComponent<NavMeshAgent>().SetDestination(EndPoint.transform.position);
 			CreatedMan.GetComponent<Lego_Character>().UnSelectable = true;
+			CreatedMan.GetComponent<Lego_Character>().TaskChassis = TaskChassis.JWalking;
 		}
 
 		if(CreatedMan != null)

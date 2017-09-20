@@ -114,7 +114,7 @@ public static class Utillity_Script
 
 	public static NavMeshPathEx ShortestPath(this Lego_Character LegoUnit, List<GameObject> listOfGameObjects, ExtraCommands ExtraCommands)
 	{
-		var results = listOfGameObjects.Select(dest => LegoUnit.CalculatePath(dest, ExtraCommands));
+		var results = listOfGameObjects.Select(dest => LegoUnit.CalculatePath(dest, ExtraCommands)).ToArray();
 		var shortest = results.OrderBy(r => r.Length).FirstOrDefault();
 
 		//make sure that the length of the closest object is not max(could be a fake route)

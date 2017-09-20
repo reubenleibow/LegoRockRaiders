@@ -14,6 +14,8 @@ public partial class System_Script : MonoBehaviour
 	public static List<GameObject> AllCrystals = new List<GameObject>();
 	public static List<GameObject> AllOre = new List<GameObject>();
 
+	public static List<GameObject> CollectableOre = new List<GameObject>();
+	public static List<GameObject> CollectableCrystals = new List<GameObject>();
 
 	public List<Image> Images = new List<Image>();
 
@@ -220,6 +222,9 @@ public partial class System_Script : MonoBehaviour
 		foreach (var Unit in SelectedGameObjects)
 		{
 			var Unit_ = Unit.GetComponent<Lego_Character>();
+			Unit_.TaskChassis = TaskChassis.JWalking;
+			Unit_.CurrentTask = CurrentJob.Nothing;
+
 
 			Unit_.TaskObject = null;
 
@@ -258,8 +263,17 @@ public partial class System_Script : MonoBehaviour
 				{
 					if (Unit_.CanDrill && Drillable)
 					{
+						Unit_.TaskChassis = TaskChassis.Drilling;
 						Unit_.CurrentTask = CurrentJob.WalkingToDrill;
 						Unit_.DistFromJob = float.MaxValue;
+						Unit_.TaskObject = Object_;
+						//-----------------------------------------------------------------------------DODGYCODE
+						if (Unit_.Items.Count > 0)
+						{
+							Unit_.Items[0].GetComponent<Collectable>().DropItem();
+							Unit_.Items.Clear();
+						}
+
 					}
 				}
 
@@ -308,8 +322,6 @@ public partial class System_Script : MonoBehaviour
 						//Set host changed to true
 						collectable.HostChanged = true;
 					}
-
-					Unit_.TaskChassis = TaskChassis.JWalking;
 				}
 
 				NavMesh.SetDestination(Object_.transform.position);

@@ -19,7 +19,8 @@ public enum TaskChassis
 	GatherOre,
 	GatherCrystals,
 	Nothing,
-	JWalking
+	JWalking,
+	Drilling,
 }
 
 public enum ExtraCommands
@@ -80,13 +81,13 @@ public class Lego_Character : MonoBehaviour
 	void Update()
 	{
 		//if the user says that it has an item in hand but it does not the set defalut
-		if(Items.Count == 0 && ItemType != CollectableType.Nothing)
+		if(Items.Count == 0 && ItemType != CollectableType.Nothing )
 		{
 			ItemType = CollectableType.Nothing;
 		}
 
 		//doing nothing than find an obnject
-		if(CurrentTask == CurrentJob.Nothing && TaskChassis == TaskChassis.Nothing)
+		if(CurrentTask == CurrentJob.Nothing && TaskChassis != TaskChassis.JWalking)
 		{
 			SetNextJob();
 		}
@@ -263,26 +264,32 @@ public class Lego_Character : MonoBehaviour
 	// this must be set by priorities
 	public void SetNextJob() 
 	{
-		if(System_Script.AllCrystals.Count >0)
+		if(TaskChassis != TaskChassis.JWalking)
 		{
-			if (TaskChassis == TaskChassis.GatherCrystals || TaskChassis == TaskChassis.Nothing)
-				FindAndCollectCrystal();
-		}
-		else
-		{
-			TaskChassis = TaskChassis.GatherOre;
-		}
+			TaskChassis = TaskChassis.Nothing;
 
-		if (System_Script.AllOre.Count > 0)
-		{
-			if (TaskChassis == TaskChassis.GatherOre)
+			if (System_Script.CollectableCrystals.Count > 0)
+			{
+				//if (TaskChassis == TaskChassis.GatherCrystals || TaskChassis == TaskChassis.Nothing)
+				FindAndCollectCrystal();
+			}
+
+			if (System_Script.CollectableOre.Count > 0)
+			{
+				TaskChassis = TaskChassis.GatherOre;
+			}
+
+			if (System_Script.CollectableOre.Count > 0 && TaskChassis == TaskChassis.GatherOre)
+			{
+				//if (TaskChassis == TaskChassis.GatherOre)
 				FindAndCollectOre();
+			}
 		}
 	}
 
 	public void FindAndCollectOre()
 	{
-		var shortestPath = this.ShortestPath(System_Script.AllOre,ExtraCommands.FindUnTargeted);
+		var shortestPath = this.ShortestPath(System_Script.CollectableOre,ExtraCommands.FindUnTargeted);
 
 		if (shortestPath.Length != float.MaxValue)
 		{
@@ -293,7 +300,7 @@ public class Lego_Character : MonoBehaviour
 
 	public void FindAndCollectCrystal()
 	{
-		var shortestPath = this.ShortestPath(System_Script.AllCrystals, ExtraCommands.FindUnTargeted);
+		var shortestPath = this.ShortestPath(System_Script.CollectableCrystals, ExtraCommands.FindUnTargeted);
 		if (shortestPath.Length != float.MaxValue)
 		{
 			GetComponent<NavMeshAgent>().SetPath(shortestPath);
