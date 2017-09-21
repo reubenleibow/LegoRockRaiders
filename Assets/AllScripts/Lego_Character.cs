@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.AI;
 
 public enum CurrentJob
 {
@@ -72,7 +73,7 @@ public class Lego_Character : MonoBehaviour
 
 	void Start()
 	{
-		Parent = this.gameObject;
+		Parent = gameObject;
 		//SelectCode = GetComponent<SelectCode>();
 		//System_Script.RaidersList.Add(this.gameObject);
 		SystemSrpt = GameObject.Find("System").GetComponent<System_Script>();
@@ -93,7 +94,7 @@ public class Lego_Character : MonoBehaviour
 		}
 
 		//arrived at a target
-		if(this.GetComponent<NavMeshAgent>().remainingDistance > 2)
+		if(GetComponent<NavMeshAgent>().remainingDistance > 2)
 		{
 			Arrived = false;
 		}
@@ -101,12 +102,12 @@ public class Lego_Character : MonoBehaviour
 		//detecting if the rock that the raider must mine is in range using ray caster method
 		if (TaskObject != null)
 		{
-			var Ray = Physics.Linecast(new Vector3(this.transform.position.x, 1, this.transform.position.z),
+			var Ray = Physics.Linecast(new Vector3(transform.position.x, 1, transform.position.z),
 										new Vector3(TaskObject.transform.position.x, 1, TaskObject.transform.position.z),
 										out TaskPoint);
 
 
-			var DirectDistance = Vector3.Distance(this.transform.position, TaskObject.transform.position);
+			var DirectDistance = Vector3.Distance(transform.position, TaskObject.transform.position);
 
 			if (Ray)
 			{
@@ -118,7 +119,7 @@ public class Lego_Character : MonoBehaviour
 				{
 					if (TaskPoint.collider.gameObject.transform.parent.gameObject == TaskObject)
 					{
-						DistFromJob = Vector3.Distance(this.transform.position, TaskPoint.point);
+						DistFromJob = Vector3.Distance(transform.position, TaskPoint.point);
 					}
 					else
 					{
@@ -140,7 +141,7 @@ public class Lego_Character : MonoBehaviour
 			//arrived at crystal and pick it up.
 			if (CurrentTask == CurrentJob.WalkToCollectable && TaskObject != null && DistFromJob <= Constants.MinDrillDistance)
 			{
-				if (TaskObject.GetComponent<Collectable>().Collector == this.gameObject)
+				if (TaskObject.GetComponent<Collectable>().Collector == gameObject)
 					PickUpCollectable();
 			}
 
@@ -154,7 +155,7 @@ public class Lego_Character : MonoBehaviour
 			{
 				if(TaskObject != null)
 				{
-					var distance = Vector3.Distance(this.transform.position, TaskObject.transform.position);
+					var distance = Vector3.Distance(transform.position, TaskObject.transform.position);
 
 					if (distance <= 2)
 					{
@@ -174,7 +175,7 @@ public class Lego_Character : MonoBehaviour
 			Parent.GetComponent<SelectCode>().Selectable = true;
 		}
 
-		if(Arrived == false && this.GetComponent<NavMeshAgent>().remainingDistance < 2)
+		if(Arrived == false && GetComponent<NavMeshAgent>().remainingDistance < 2)
 		{
 			Arrived = true;
 			ArrivedAtDest();
@@ -188,7 +189,7 @@ public class Lego_Character : MonoBehaviour
 
 	public void StartDrilling()
 	{
-		this.GetComponent<NavMeshAgent>().ResetPath();
+		GetComponent<NavMeshAgent>().ResetPath();
 		CurrentTask = CurrentJob.Drilling;
 	}
 

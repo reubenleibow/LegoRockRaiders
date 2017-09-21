@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.AI;
+
 
 public class ToolStore_Script : MonoBehaviour {
 
