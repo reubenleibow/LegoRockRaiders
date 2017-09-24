@@ -34,7 +34,7 @@ public static class Utillity_Script
 	{
 		var path = new NavMeshPath();
 		var dist = Vector3.Distance(character.transform.position,destination.transform.position);
-		character.GetComponent<NavMeshAgent>().CalculatePath(destination.transform.position, path);
+		character.GetComponent<NavMeshAgent>().CalculatePath(new Vector3(destination.transform.position.x,0, destination.transform.position.z), path);
 
 		var length = path.Length(dist);
 
@@ -46,6 +46,7 @@ public static class Utillity_Script
 		};
 	}
 
+	//Then come here and do this event multiple times----->
 	public static NavMeshPathEx CalculatePath(this Lego_Character character, GameObject destination, ExtraCommands ExtraCommands)
 	{
 
@@ -74,6 +75,17 @@ public static class Utillity_Script
 			}
 		}
 
+		if (ExtraCommands == ExtraCommands.FindUnTargetedObjects)
+		{ 
+			if(destination != null)
+			{
+				if (destination.GetComponent<Work_Script>().Worker == null)
+				{
+					return CalculatePath(character, destination);
+				}
+			}
+		}
+
 		//No path found
 		return new NavMeshPathEx
 		{
@@ -82,25 +94,6 @@ public static class Utillity_Script
 			Object = destination
 		};
 	}
-
-	/// <summary>
-	/// Given a character and a destination, calculate the path between them.
-	/// </summary>
-	//public static NavMeshPathEx CalculatePath(this NavMeshAgent character, GameObject destination)
-	//{
-	//	var path = new NavMeshPath();
-	//	var dist = Vector3.Distance();
-	//	character.CalculatePath(destination.transform.position, path);
-
-	//	var length = path.Length();
-
-	//	return new NavMeshPathEx
-	//	{
-	//		NavPath = path,
-	//		Length = length,
-	//		Object = destination
-	//	};
-	//}
 
 	public static NavMeshPathEx ShortestPath(this Lego_Character LegoUnit, List<GameObject> listOfGameObjects)
 	{
@@ -114,6 +107,7 @@ public static class Utillity_Script
 		return shortest;
 	}
 
+	//first come here and dp this event----->
 	public static NavMeshPathEx ShortestPath(this Lego_Character LegoUnit, List<GameObject> listOfGameObjects, ExtraCommands ExtraCommands)
 	{
 		var results = listOfGameObjects.Select(dest => LegoUnit.CalculatePath(dest, ExtraCommands)).ToArray();
@@ -123,6 +117,15 @@ public static class Utillity_Script
 		if(ExtraCommands == ExtraCommands.FindUnTargeted && shortest.Object.GetComponent<Collectable>().Collector == null && shortest.Length != float.MaxValue)
 		{
 			shortest.Object.GetComponent<Collectable>().Collector = LegoUnit.gameObject;
+		}
+
+		if (ExtraCommands == ExtraCommands.FindUnTargetedObjects)
+		{
+
+			if(shortest.Object.GetComponent<Work_Script>().Worker == false && shortest.Length != float.MaxValue)
+			{
+				shortest.Object.GetComponent<Work_Script>().Worker = LegoUnit.gameObject;
+			}
 		}
 
 		return shortest;

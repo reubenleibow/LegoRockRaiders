@@ -14,6 +14,8 @@ public partial class System_Script : MonoBehaviour
 	public static List<GameObject> AllBuildings = new List<GameObject>();
 	public static List<GameObject> AllCrystals = new List<GameObject>();
 	public static List<GameObject> AllOre = new List<GameObject>();
+	public static List<GameObject> DrillRocks = new List<GameObject>();
+
 
 	public static List<GameObject> CollectableOre = new List<GameObject>();
 	public static List<GameObject> CollectableCrystals = new List<GameObject>();
@@ -45,6 +47,8 @@ public partial class System_Script : MonoBehaviour
 	public int CrystalsCollectedCart = 0;
 	public int OreCollectedCart = 0;
 
+	public GameObject selectedGameObject;
+
 
 
 	void Start()
@@ -56,6 +60,8 @@ public partial class System_Script : MonoBehaviour
 	void Update()
 	{
 		SelectObjects();
+
+		Debug.Log(DrillRocks.Count);
 
 		foreach (var obj in AllSelectableGameObjects.ToArray())
 		{
@@ -170,6 +176,16 @@ public partial class System_Script : MonoBehaviour
 				{
 					obj.GetComponent<NavMeshAgent>().SetDestination(destination);
 				}
+			}
+		}
+
+		if (Input.GetMouseButtonDown(0))
+		{
+			var detect = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out dest);
+
+			if(detect)
+			{
+				OnLeftClick(dest);
 			}
 		}
 	}
@@ -343,5 +359,37 @@ public partial class System_Script : MonoBehaviour
 				
 			}
 		}		
+	}
+
+	public void OnLeftClick(RaycastHit Point)
+	{
+		var taskable = false;
+		var Object = "";
+		selectedGameObject = null;
+		
+		if (Point.transform.tag == "Rock" )
+		{
+			taskable = true;
+			Object = Point.transform.tag;
+
+			selectedGameObject = Point.collider.transform.parent.gameObject;
+		}
+
+		if(taskable)
+		{
+			if(Object == "Rock")
+			{
+				CurrentMenuBarNumber = 4;
+			}
+		}
+	}
+
+	public void Onclick_Drill()
+	{
+		if (selectedGameObject.GetComponent<Rock_Script>().WorkedOn == false)
+		{
+			selectedGameObject.GetComponent<Rock_Script>().WorkedOn = true;
+			DrillRocks.Add(selectedGameObject);
+		}
 	}
 }

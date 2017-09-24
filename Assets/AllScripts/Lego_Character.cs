@@ -12,7 +12,7 @@ public enum CurrentJob
 	CarringCollectable,
 	DropOffCollectable,
 	PutCollectableDownAtCentre,
-	WanderAroungWithItem
+	WanderAroungWithItem,
 }
 
 public enum TaskChassis
@@ -30,6 +30,7 @@ public enum ExtraCommands
 	Nothing,
 	ReturnCrystal,
 	ReturnOre,
+	FindUnTargetedObjects
 }
 
 
@@ -54,7 +55,7 @@ public class Lego_Character : MonoBehaviour
 	//Propeties
 	public bool UnSelectable = false;
 	public bool CanDrill = true;
-	public int DrillStrength = 5;
+	private int DrillStrength = 10;
 	public bool Arrived = false;
 
 
@@ -82,13 +83,13 @@ public class Lego_Character : MonoBehaviour
 	void Update()
 	{
 		//if the user says that it has an item in hand but it does not the set defalut
-		if(Items.Count == 0 && ItemType != CollectableType.Nothing )
+		if(Items.Count == 0 && ItemType != CollectableType.Nothing)
 		{
 			ItemType = CollectableType.Nothing;
 		}
 
 		//doing nothing than find an obnject
-		if(CurrentTask == CurrentJob.Nothing && TaskChassis != TaskChassis.JWalking)
+		if(CurrentTask == CurrentJob.Nothing && TaskChassis != TaskChassis.JWalking && !UnSelectable)
 		{
 			SetNextJob();
 		}
@@ -285,6 +286,17 @@ public class Lego_Character : MonoBehaviour
 				//if (TaskChassis == TaskChassis.GatherOre)
 				FindAndCollectOre();
 			}
+
+
+			if (System_Script.DrillRocks.Count > 0)
+			{
+				TaskChassis = TaskChassis.Drilling;
+			}
+
+			if (System_Script.DrillRocks.Count > 0 && TaskChassis == TaskChassis.Drilling)
+			{
+				FindAndDrillRocks();
+			}
 		}
 	}
 
@@ -299,6 +311,17 @@ public class Lego_Character : MonoBehaviour
 		}
 	}
 
+	public void FindAndDrillRocks()
+	{
+		var shortestPath = this.ShortestPath(System_Script.DrillRocks, ExtraCommands.FindUnTargetedObjects);
+
+		if (shortestPath.Length != float.MaxValue)
+		{
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+			StartDrillingProcess();
+		}
+	}
+
 	public void FindAndCollectCrystal()
 	{
 		var shortestPath = this.ShortestPath(System_Script.CollectableCrystals, ExtraCommands.FindUnTargeted);
@@ -307,7 +330,6 @@ public class Lego_Character : MonoBehaviour
 			GetComponent<NavMeshAgent>().SetPath(shortestPath);
 			StartCollecting();
 		}
-
 	}
 
 	public void StartCollecting()
@@ -316,4 +338,9 @@ public class Lego_Character : MonoBehaviour
 		DistFromJob = float.MaxValue;
 	}
 
+	public void StartDrillingProcess()
+	{
+		CurrentTask = CurrentJob.WalkingToDrill;
+		DistFromJob = float.MaxValue;
+	}
 }

@@ -120,16 +120,12 @@ public class Collectable : MonoBehaviour {
 		{
 			System_Script.AllCrystals.Remove(this.gameObject);
 			System_Script.CollectableCrystals.Remove(this.gameObject);
-
-
 		}
 
 		if (CollectableType == CollectableType.Ore)
 		{
 			System_Script.AllOre.Remove(this.gameObject);
 			System_Script.CollectableOre.Remove(this.gameObject);
-
-
 		}
 	}
 	
