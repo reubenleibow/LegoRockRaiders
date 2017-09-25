@@ -8,7 +8,6 @@ public class Rock_Script : MonoBehaviour
 	public int Y;
 	public float Health = 100;
 	private GameObject System_;
-	public bool WorkedOn = false;
 
 	// Use this for initialization
 	void Start()
@@ -33,7 +32,7 @@ public class Rock_Script : MonoBehaviour
 
 	public void DestroyRock()
 	{
-		ResetLegoUnit();
+		//ResetLegoUnit();
 		System_Script.DrillRocks.Remove(this.gameObject);
 		System_.GetComponent<Game_Script>().OnDestroyRock(RockProperties);
 	}

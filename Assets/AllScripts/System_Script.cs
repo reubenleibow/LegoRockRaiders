@@ -37,6 +37,7 @@ public partial class System_Script : MonoBehaviour
 
 	public GameObject Toolstore;
 	public GameObject Lego_Raider;
+	public GameObject SelectorSquare;
 
 	public int MaxRaiders = 8;
 	public int CreateRaiderQue = 0;
@@ -60,8 +61,6 @@ public partial class System_Script : MonoBehaviour
 	void Update()
 	{
 		SelectObjects();
-
-		Debug.Log(DrillRocks.Count);
 
 		foreach (var obj in AllSelectableGameObjects.ToArray())
 		{
@@ -181,11 +180,16 @@ public partial class System_Script : MonoBehaviour
 
 		if (Input.GetMouseButtonDown(0))
 		{
-			var detect = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out dest);
+			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-			if(detect)
+			if (Physics.Raycast(ray, out dest))
 			{
 				OnLeftClick(dest);
+			}
+
+			if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")))
+			{
+				SelectorSquare.transform.position = dest.point;
 			}
 		}
 	}
@@ -306,7 +310,7 @@ public partial class System_Script : MonoBehaviour
 						Unit_.TaskObject = Object_;
 
 						//if another raider is going for it then make that raider drop it
-						if(collectable.Collector != null)
+						if (collectable.Collector != null)
 						{
 							collectable.ClearAllCollectors();
 						}
@@ -356,9 +360,9 @@ public partial class System_Script : MonoBehaviour
 			{
 				character.TaskObject = null;
 				character.CurrentTask = CurrentJob.Nothing;
-				
+
 			}
-		}		
+		}
 	}
 
 	public void OnLeftClick(RaycastHit Point)
@@ -366,8 +370,9 @@ public partial class System_Script : MonoBehaviour
 		var taskable = false;
 		var Object = "";
 		selectedGameObject = null;
-		
-		if (Point.transform.tag == "Rock" )
+		Object = Point.transform.tag;
+
+		if (Point.transform.tag == "Rock")
 		{
 			taskable = true;
 			Object = Point.transform.tag;
@@ -375,21 +380,32 @@ public partial class System_Script : MonoBehaviour
 			selectedGameObject = Point.collider.transform.parent.gameObject;
 		}
 
-		if(taskable)
+		if (taskable)
 		{
-			if(Object == "Rock")
+			if (Object == "Rock")
 			{
 				CurrentMenuBarNumber = 4;
+
+				if (selectedGameObject.GetComponent<Work_Script>().WorkedOn)
+				{
+					Drill_Icon.enabled = false;
+				}
+				else
+				{
+					Drill_Icon.enabled = true;
+				}
 			}
 		}
 	}
 
 	public void Onclick_Drill()
 	{
-		if (selectedGameObject.GetComponent<Rock_Script>().WorkedOn == false)
+		if (selectedGameObject.GetComponent<Work_Script>().WorkedOn == false)
 		{
-			selectedGameObject.GetComponent<Rock_Script>().WorkedOn = true;
+			selectedGameObject.GetComponent<Work_Script>().WorkedOn = true;
 			DrillRocks.Add(selectedGameObject);
 		}
+
+		CurrentMenuBarNumber = 1;
 	}
 }

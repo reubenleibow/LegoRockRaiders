@@ -5,6 +5,7 @@ using UnityEngine;
 public class Work_Script : MonoBehaviour {
 
 	public GameObject Worker;
+	public bool WorkedOn = false;
 
 	// Use this for initialization
 	void Start () {
@@ -20,7 +21,7 @@ public class Work_Script : MonoBehaviour {
 			{
 				Worker = null;
 
-				if(GetComponent<Rock_Script>().WorkedOn)
+				if(WorkedOn)
 				{
 					AddtoList();
 				}
