@@ -2,20 +2,45 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class Work_Script : MonoBehaviour {
+
+	public enum ObjectType
+	{
+		Rock,
+		Rubble,
+		Nothing
+	}
 
 	public GameObject Worker;
 	public bool WorkedOn = false;
+	public float Health = 100;
+	public ObjectType Type = ObjectType.Nothing;
+	private GameObject System_;
+	public GridPos RockProperties;
+
+
+	//Properties for grid finding(Used for array)
+	public int X;
+	public int Y;
+
 
 	// Use this for initialization
-	void Start () {
-		
+	void Start ()
+	{
+		System_ = GameObject.Find("System");
 	}
-	
+
 	// Update is called once per frame
 	void Update ()
 	{
-		if(Worker != null)
+		if (RockProperties != null)
+		{
+			X = RockProperties.X;
+			Y = RockProperties.Y;
+		}
+
+		if (Worker != null)
 		{
 			if(Worker.GetComponent<Lego_Character>().TaskObject != this.gameObject)
 			{
@@ -37,5 +62,45 @@ public class Work_Script : MonoBehaviour {
 	public void AddtoList()
 	{
 		System_Script.DrillRocks.Add(this.gameObject);
+	}
+
+	private void OnDestroy()
+	{
+		if (GetComponent<Work_Script>().Worker != null)
+		{
+			ResetLegoUnit();
+		}
+
+		//Remove from list commands
+		if (System_Script.ClearRubble.Contains(this.gameObject))
+		{
+			System_Script.ClearRubble.Remove(this.gameObject);
+		}
+
+		if (System_Script.DrillRocks.Contains(this.gameObject))
+		{
+			System_Script.DrillRocks.Remove(this.gameObject);
+		}
+
+		if(Health <= 0)
+		{
+			var POS = this.transform.position;
+
+			if (Type == ObjectType.Rock)
+			{
+				var Rubble = Instantiate(System_.GetComponent<System_Script>().Rubble, new Vector3(POS.x, 0.1f, POS.z), Quaternion.identity);
+			}
+		}
+
+		System_.GetComponent<Game_Script>().OnDestroyRock(RockProperties);
+	}
+
+	//clear lego unit commands
+	public void ResetLegoUnit()
+	{
+		var legounit = GetComponent<Work_Script>().Worker.GetComponent<Lego_Character>();
+		legounit.TaskObject = null;
+		legounit.CurrentTask = CurrentJob.Nothing;
+		legounit.TaskChassis = TaskChassis.Nothing;
 	}
 }

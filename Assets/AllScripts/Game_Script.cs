@@ -15,7 +15,7 @@ public class GridPos
 
 	public bool IsCorner
 	{
-		get { return RockShape == RockShape.BottomRight || RockShape == RockShape.BottomLeft || RockShape == RockShape.TopRight || RockShape == RockShape.TopLeft; }
+		get { return RockShape == RockShape.BottomRight || RockShape == RockShape.BottomLeft || RockShape == RockShape.TopRight || RockShape == RockShape.TopLeft || RockShape == RockShape.Top || RockShape == RockShape.Bottom || RockShape == RockShape.Left || RockShape == RockShape.Right; }
 	}
 
 	public override string ToString()
@@ -145,11 +145,14 @@ public class Game_Script : MonoBehaviour
 		//RockGridNumbers[5, 6].RockType = RockType.HardRock;
 
 		ResetRockMeshes(0, Rows, 0, Columns);
+
+		
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
+		//Debug.Log(RockGridNumbers[11, 7].RockShape & RockGridNumbers[11, 9].RockShape & RockGridNumbers[12, 8].RockShape & RockGridNumbers[10, 8].RockShape);
 	}
 
 	/// <summary>
@@ -170,6 +173,8 @@ public class Game_Script : MonoBehaviour
 
 				// set the number of rocks next to this one
 				UpdateAdjacentRocks(X, Y);
+
+
 
 				// set the rock shape
 				if (Up == RockType.None)
@@ -203,17 +208,20 @@ public class Game_Script : MonoBehaviour
 				// create rock mesh
 				if (curr.RockType != RockType.None)
 				{
+
 					RecreateRockMesh(X, Y);
 				}
+
+				
 			}
 		}
 
+		//creating the square slops
 		for (int X = Mathf.Max(0, MinX); X <= Mathf.Min(MaxX, Rows - 1); X++)
 		{
 			for (int Y = Mathf.Max(0, MinY); Y <= Mathf.Min(MaxY, Columns - 1); Y++)
 			{
 				var curr = RockGridNumbers[X, Y];
-				//var corner = (RockShape.TopLeft || RockShape.TopRight)
 
 				if (curr.RockShape == RockShape.Square)
 				{
@@ -244,6 +252,18 @@ public class Game_Script : MonoBehaviour
 				}
 			}
 		}
+
+		//if (X == 11 && Y == 8)
+		//{
+		Debug.Log(RockGridNumbers[11, 7].RockShape);
+		Debug.Log(RockGridNumbers[11, 9].RockShape);
+		Debug.Log(RockGridNumbers[12, 8].RockShape);
+		Debug.Log(RockGridNumbers[10, 8].RockShape);
+
+
+		//}
+
+		//ReUpdateRocks(0, MaxX, 0, MaxY);
 	}
 
 	/// <summary>
@@ -309,37 +329,35 @@ public class Game_Script : MonoBehaviour
 			curr.gameObj.transform.eulerAngles = new Vector3(0, 90, 0);
 		}
 
+		//Square slopes
 		if (curr.RockShape == RockShape.SquareBottomLeft)
 		{
 			curr.gameObj = Instantiate(RockSquareCorner, new Vector3(RockWidth * X, RockHeight, RockWidth * Y), Quaternion.identity) as GameObject;
 			curr.gameObj.transform.eulerAngles = new Vector3(0, 90, 0);
-			//R
 		}
 
 		if (curr.RockShape == RockShape.SquareBottomRight)
 		{
 			curr.gameObj = Instantiate(RockSquareCorner, new Vector3(RockWidth * X, RockHeight, RockWidth * Y), Quaternion.identity) as GameObject;
 			curr.gameObj.transform.eulerAngles = new Vector3(0, 0, 0);
-
 		}
 
 		if (curr.RockShape == RockShape.SquareTopLeft)
 		{
 			curr.gameObj = Instantiate(RockSquareCorner, new Vector3(RockWidth * X, RockHeight, RockWidth * Y), Quaternion.identity) as GameObject;
 			curr.gameObj.transform.eulerAngles = new Vector3(0, 180, 0);
-
-			//R
-
 		}
 
 		if (curr.RockShape == RockShape.SquareTopRight)
 		{
 			curr.gameObj = Instantiate(RockSquareCorner, new Vector3(RockWidth * X, RockHeight, RockWidth * Y), Quaternion.identity) as GameObject;
 			curr.gameObj.transform.eulerAngles = new Vector3(0, 270, 0);
-
 		}
 
 		curr.gameObj.GetComponent<Rock_Script>().RockProperties = curr;
+		curr.gameObj.GetComponent<Rock_Script>().Shape = curr.RockShape;
+
+
 	}
 
 	public void OnDestroyRock(GridPos rock)
@@ -371,6 +389,7 @@ public class Game_Script : MonoBehaviour
 
 			if (Rks.RockType != RockType.None)
 			{
+				Rks.gameObj.GetComponent<Rock_Script>().Health = 0;
 				Rks.RockType = RockType.None;
 				Rks.RockShape = RockShape.None;
 				Destroy(Rks.gameObj);
@@ -425,6 +444,45 @@ public class Game_Script : MonoBehaviour
 				curr.AdjacentRocks++;
 			if (Right != RockType.None)
 				curr.AdjacentRocks++;
+		}
+	}
+
+	public void ReUpdateRocks(int MinX, int MaxX, int MinY, int MaxY)
+	{
+		for (int X = Mathf.Max(0, MinX); X <= Mathf.Min(MaxX, Rows - 1); X++)
+		{
+			for (int Y = Mathf.Max(0, MinY); Y <= Mathf.Min(MaxY, Columns - 1); Y++)
+			{
+				var curr = RockGridNumbers[X, Y];
+
+				if (curr.RockShape == RockShape.Square)
+				{
+					if (RockGridNumbers[X, Y + 1].IsCorner == true && RockGridNumbers[X + 1, Y].IsCorner == true)
+					{
+						curr.RockShape = RockShape.SquareTopRight;
+						RecreateRockMesh(X, Y);
+					}
+
+					if (RockGridNumbers[X, Y + 1].IsCorner == true && RockGridNumbers[X - 1, Y].IsCorner == true)
+					{
+						curr.RockShape = RockShape.SquareTopLeft;
+						RecreateRockMesh(X, Y);
+
+					}
+
+					if (RockGridNumbers[X, Y - 1].IsCorner == true && RockGridNumbers[X + 1, Y].IsCorner == true)
+					{
+						curr.RockShape = RockShape.SquareBottomRight;
+						RecreateRockMesh(X, Y);
+					}
+
+					if (RockGridNumbers[X, Y - 1].IsCorner == true && RockGridNumbers[X - 1, Y].IsCorner == true)
+					{
+						curr.RockShape = RockShape.SquareBottomLeft;
+						RecreateRockMesh(X, Y);
+					}
+				}
+			}
 		}
 	}
 }

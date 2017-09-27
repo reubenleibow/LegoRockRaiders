@@ -8,6 +8,8 @@ public class Rock_Script : MonoBehaviour
 	public int Y;
 	public float Health = 100;
 	private GameObject System_;
+	public RockShape Shape;
+
 
 	// Use this for initialization
 	void Start()
@@ -43,6 +45,17 @@ public class Rock_Script : MonoBehaviour
 		if(GetComponent<Work_Script>().Worker != null)
 		{
 			ResetLegoUnit();
+		}
+
+		if(System_Script.DrillRocks.Contains(this.gameObject))
+		{
+			System_Script.DrillRocks.Remove(this.gameObject);
+		}
+
+		if(Health <= 0)
+		{
+			var POS = this.transform.position;
+			var Rubble = Instantiate(System_.GetComponent<System_Script>().Rubble, new Vector3(POS.x, 0.1f, POS.z), Quaternion.identity);
 		}
 	}
 

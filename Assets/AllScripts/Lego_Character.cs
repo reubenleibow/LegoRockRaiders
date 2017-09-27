@@ -8,11 +8,13 @@ public enum CurrentJob
 	Nothing,
 	Drilling,
 	WalkingToDrill,
+	WalkingToRubble,
 	WalkToCollectable,
 	CarringCollectable,
 	DropOffCollectable,
 	PutCollectableDownAtCentre,
 	WanderAroungWithItem,
+
 }
 
 public enum TaskChassis
@@ -297,6 +299,11 @@ public class Lego_Character : MonoBehaviour
 			{
 				FindAndDrillRocks();
 			}
+
+			if (System_Script.ClearRubble.Count > 0)
+			{
+				FindAndClearRubble();
+			}
 		}
 	}
 
@@ -322,6 +329,17 @@ public class Lego_Character : MonoBehaviour
 		}
 	}
 
+	public void FindAndClearRubble()
+	{
+		var shortestPath = this.ShortestPath(System_Script.ClearRubble, ExtraCommands.FindUnTargetedObjects);
+
+		if (shortestPath.Length != float.MaxValue)
+		{
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+			StartClearingProcess();
+		}
+	}
+
 	public void FindAndCollectCrystal()
 	{
 		var shortestPath = this.ShortestPath(System_Script.CollectableCrystals, ExtraCommands.FindUnTargeted);
@@ -341,6 +359,12 @@ public class Lego_Character : MonoBehaviour
 	public void StartDrillingProcess()
 	{
 		CurrentTask = CurrentJob.WalkingToDrill;
+		DistFromJob = float.MaxValue;
+	}
+
+	public void StartClearingProcess()
+	{
+		CurrentTask = CurrentJob.WalkingToRubble;
 		DistFromJob = float.MaxValue;
 	}
 }

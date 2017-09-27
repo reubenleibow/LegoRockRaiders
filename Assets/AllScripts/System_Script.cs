@@ -15,6 +15,8 @@ public partial class System_Script : MonoBehaviour
 	public static List<GameObject> AllCrystals = new List<GameObject>();
 	public static List<GameObject> AllOre = new List<GameObject>();
 	public static List<GameObject> DrillRocks = new List<GameObject>();
+	public static List<GameObject> ClearRubble = new List<GameObject>();
+
 
 
 	public static List<GameObject> CollectableOre = new List<GameObject>();
@@ -49,6 +51,8 @@ public partial class System_Script : MonoBehaviour
 	public int OreCollectedCart = 0;
 
 	public GameObject selectedGameObject;
+
+	public GameObject Rubble;
 
 
 
@@ -101,10 +105,12 @@ public partial class System_Script : MonoBehaviour
 			CurrentMenuBarNumber = 1;
 		}
 
-		//if(SelectedGameObjects.Count == 1)
-		//{
-		//	FocusedObject = SelectedGameObjects[0].ObjectType;
-		//}
+		
+		//---------------------------WorkOn
+		if(selectedGameObject != null || SelectedGameObjects.Count != 0)
+		{
+			SelectorSquare.SetActive(false);
+		}
 	}
 
 	private void SelectObjects()
@@ -187,9 +193,23 @@ public partial class System_Script : MonoBehaviour
 				OnLeftClick(dest);
 			}
 
-			if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")))
+			if (selectedGameObject == null)
 			{
-				SelectorSquare.transform.position = dest.point;
+				if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")))
+				{
+					var P = dest.point;
+					var X_ = (Mathf.Round(P.x / 12)) * 12;
+					var Z_ = (Mathf.Round(P.z / 12)) * 12;
+
+					SelectorSquare.transform.position = new Vector3(X_, 0.1f, Z_);
+				}
+			}
+
+			if (selectedGameObject == null && SelectedGameObjects.Count == 0)
+			{
+				SelectorSquare.SetActive(true);
+				CurrentMenuBarNumber = 5;
+
 			}
 		}
 	}
@@ -380,6 +400,13 @@ public partial class System_Script : MonoBehaviour
 			selectedGameObject = Point.collider.transform.parent.gameObject;
 		}
 
+		if(Point.transform.tag == "Rubble")
+		{
+			CurrentMenuBarNumber = 5;
+			selectedGameObject = Point.collider.gameObject;
+			Debug.Log("dasd");
+		}
+
 		if (taskable)
 		{
 			if (Object == "Rock")
@@ -404,6 +431,18 @@ public partial class System_Script : MonoBehaviour
 		{
 			selectedGameObject.GetComponent<Work_Script>().WorkedOn = true;
 			DrillRocks.Add(selectedGameObject);
+		}
+
+		CurrentMenuBarNumber = 1;
+	}
+
+	public void OnClick_ClearRubble()
+	{
+		Debug.Log(selectedGameObject);
+		if (selectedGameObject.GetComponent<Work_Script>().WorkedOn == false)
+		{
+			selectedGameObject.GetComponent<Work_Script>().WorkedOn = true;
+			ClearRubble.Add(selectedGameObject);
 		}
 
 		CurrentMenuBarNumber = 1;
