@@ -283,7 +283,7 @@ public partial class System_Script : MonoBehaviour
 
 			if (Point.transform.tag == "Rock")
 			{
-				var Rock_Type = Object_.GetComponent<Rock_Script>().RockProperties.RockType;
+				var Rock_Type = Object_.GetComponent<Work_Script>().RockProperties.RockType;
 
 				Drillable = (Rock_Type == RockType.LooseRock || Rock_Type == RockType.SoftRock || Rock_Type == RockType.HardRock);
 			}
@@ -425,6 +425,7 @@ public partial class System_Script : MonoBehaviour
 		}
 	}
 
+	//Work on Code
 	public void Onclick_Drill()
 	{
 		if (selectedGameObject.GetComponent<Work_Script>().WorkedOn == false)
@@ -438,7 +439,6 @@ public partial class System_Script : MonoBehaviour
 
 	public void OnClick_ClearRubble()
 	{
-		Debug.Log(selectedGameObject);
 		if (selectedGameObject.GetComponent<Work_Script>().WorkedOn == false)
 		{
 			selectedGameObject.GetComponent<Work_Script>().WorkedOn = true;

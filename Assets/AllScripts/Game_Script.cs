@@ -354,8 +354,8 @@ public class Game_Script : MonoBehaviour
 			curr.gameObj.transform.eulerAngles = new Vector3(0, 270, 0);
 		}
 
-		curr.gameObj.GetComponent<Rock_Script>().RockProperties = curr;
-		curr.gameObj.GetComponent<Rock_Script>().Shape = curr.RockShape;
+		curr.gameObj.GetComponent<Work_Script>().RockProperties = curr;
+		//curr.gameObj.GetComponent<Work_Script>().Shape = curr.RockShape;
 
 
 	}
@@ -389,7 +389,7 @@ public class Game_Script : MonoBehaviour
 
 			if (Rks.RockType != RockType.None)
 			{
-				Rks.gameObj.GetComponent<Rock_Script>().Health = 0;
+				Rks.gameObj.GetComponent<Work_Script>().Health = 0;
 				Rks.RockType = RockType.None;
 				Rks.RockShape = RockShape.None;
 				Destroy(Rks.gameObj);

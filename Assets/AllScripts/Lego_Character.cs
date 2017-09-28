@@ -14,6 +14,7 @@ public enum CurrentJob
 	DropOffCollectable,
 	PutCollectableDownAtCentre,
 	WanderAroungWithItem,
+	ClearingRubble,
 
 }
 
@@ -135,22 +136,34 @@ public class Lego_Character : MonoBehaviour
 				DistFromJob = DirectDistance;
 			}
 
-			//If Walking to rock
-			if (CurrentTask == CurrentJob.WalkingToDrill && DistFromJob <= Constants.MinDrillDistance)
+			if (DistFromJob <= Constants.MinDrillDistance)
 			{
-				StartDrilling();
-			}
+				if (CurrentTask == CurrentJob.WalkingToDrill)
+				{
+					StartDrilling();
+				}
 
-			//arrived at crystal and pick it up.
-			if (CurrentTask == CurrentJob.WalkToCollectable && TaskObject != null && DistFromJob <= Constants.MinDrillDistance)
-			{
-				if (TaskObject.GetComponent<Collectable>().Collector == gameObject)
-					PickUpCollectable();
+				if (CurrentTask == CurrentJob.WalkingToRubble)
+				{
+					StartClearingRubble();
+				}
+
+				//arrived at crystal and pick it up.
+				if (CurrentTask == CurrentJob.WalkToCollectable && TaskObject != null)
+				{
+					if (TaskObject.GetComponent<Collectable>().Collector == gameObject)
+						PickUpCollectable();
+				}
 			}
 
 			if (CurrentTask == CurrentJob.Drilling)
 			{
 				Drilling();
+			}
+
+			if (CurrentTask == CurrentJob.ClearingRubble)
+			{
+				ClearingRubble();
 			}
 
 			//place collectable at base
@@ -187,13 +200,24 @@ public class Lego_Character : MonoBehaviour
 
 	public void Drilling()
 	{
-		TaskObject.GetComponent<Rock_Script>().Health -= DrillStrength * Time.deltaTime;
+		TaskObject.GetComponent<Work_Script>().Health -= DrillStrength * Time.deltaTime;
 	}
 
 	public void StartDrilling()
 	{
 		GetComponent<NavMeshAgent>().ResetPath();
 		CurrentTask = CurrentJob.Drilling;
+	}
+
+	public void ClearingRubble()
+	{
+		TaskObject.GetComponent<Work_Script>().Health -= DrillStrength * Time.deltaTime;
+	}
+
+	public void StartClearingRubble()
+	{
+		GetComponent<NavMeshAgent>().ResetPath();
+		CurrentTask = CurrentJob.ClearingRubble;
 	}
 
 	public void PickUpCollectable()

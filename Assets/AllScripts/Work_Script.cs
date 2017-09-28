@@ -24,7 +24,7 @@ public class Work_Script : MonoBehaviour {
 	public int X;
 	public int Y;
 
-
+	
 	// Use this for initialization
 	void Start ()
 	{
@@ -56,6 +56,11 @@ public class Work_Script : MonoBehaviour {
 			{
 				System_Script.DrillRocks.Remove(this.gameObject);
 			}
+		}
+
+		if(Health <= 0)
+		{
+			Destroy(this.gameObject);
 		}
 	}
 
@@ -92,7 +97,7 @@ public class Work_Script : MonoBehaviour {
 			}
 		}
 
-		System_.GetComponent<Game_Script>().OnDestroyRock(RockProperties);
+		//System_.GetComponent<Game_Script>().OnDestroyRock(RockProperties);
 	}
 
 	//clear lego unit commands
@@ -103,4 +108,11 @@ public class Work_Script : MonoBehaviour {
 		legounit.CurrentTask = CurrentJob.Nothing;
 		legounit.TaskChassis = TaskChassis.Nothing;
 	}
+
+	public void DestroyRock()
+	{
+		//System_Script.DrillRocks.Remove(this.gameObject);
+		System_.GetComponent<Game_Script>().OnDestroyRock(RockProperties);
+	}
+
 }
