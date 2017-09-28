@@ -363,7 +363,7 @@ public class Game_Script : MonoBehaviour
 	public void OnDestroyRock(GridPos rock)
 	{
 
-		this.GetComponent<System_Script>().OnRockDestroyed(rock.gameObj);
+		//this.GetComponent<System_Script>().OnRockDestroyed(rock.gameObj);
 
 		// destroy current rock
 		EraseRock(rock.X, rock.Y);

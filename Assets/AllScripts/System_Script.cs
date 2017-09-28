@@ -111,6 +111,8 @@ public partial class System_Script : MonoBehaviour
 		{
 			SelectorSquare.SetActive(false);
 		}
+
+		Update2();
 	}
 
 	private void SelectObjects()
@@ -160,8 +162,10 @@ public partial class System_Script : MonoBehaviour
 			SelectionBoxImage.rectTransform.sizeDelta = new Vector2(Mathf.Abs(maxX - minX), Mathf.Abs(maxY - minY));
 			SelectionBoxImage.transform.position = new Vector3(minX, minY);
 		}
-
-		//moving the unit to the destination;
+	}
+	//moving the unit to the destination;
+	public void Update2()
+	{
 		RaycastHit dest;
 
 		if (Input.GetMouseButtonDown(1))
@@ -171,8 +175,6 @@ public partial class System_Script : MonoBehaviour
 			OnRightClick(dest);
 
 			var destination = dest.point;
-
-			OnClickAnyGameObject(dest);
 
 			foreach (var obj in SelectedGameObjects)
 			{
@@ -209,7 +211,6 @@ public partial class System_Script : MonoBehaviour
 			{
 				SelectorSquare.SetActive(true);
 				CurrentMenuBarNumber = 5;
-
 			}
 		}
 	}
@@ -242,17 +243,6 @@ public partial class System_Script : MonoBehaviour
 	public void OnClick_Buid()
 	{
 		CurrentMenuBarNumber = 3;
-	}
-
-	public void OnClickAnyGameObject(RaycastHit obj)
-	{
-		//if (obj.collider.transform.tag == "Rock")
-		//{
-		//	var rockParent = obj.collider.gameObject.transform.parent.gameObject;
-		//	Game_Script.OnDestroyRock(rockParent.GetComponent<Rock_Script>().RockProperties);
-		//
-		//	Debug.Log(rockParent);
-		//}
 	}
 
 	public void OnRightClick(RaycastHit Point)
@@ -366,21 +356,6 @@ public partial class System_Script : MonoBehaviour
 				}
 
 				NavMesh.SetDestination(Object_.transform.position);
-			}
-		}
-	}
-
-	public void OnRockDestroyed(GameObject Rock)
-	{
-		foreach (var Unit in RaidersList)
-		{
-			var character = Unit.GetComponent<Lego_Character>();
-
-			if (character.TaskObject == Rock)
-			{
-				character.TaskObject = null;
-				character.CurrentTask = CurrentJob.Nothing;
-
 			}
 		}
 	}
