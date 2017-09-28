@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 partial class System_Script
 {
-	public Button CreateMan_Icon;
 	public Text CreateMan_Icon_Text;
 	public Image Menu_1_Background;
 	public Image Menu_2_Background;
@@ -14,10 +13,7 @@ partial class System_Script
 	public Image Menu_5_Background;
 
 
-	public Button Drill_Icon;
-	public Button PowerPath_Icon;
-	public Button ClearRubble_Icon;
-	public Button ClearRubbleE_Icon;
+
 
 
 

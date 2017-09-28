@@ -40,12 +40,15 @@ public partial class System_Script : MonoBehaviour
 	public GameObject Toolstore;
 	public GameObject Lego_Raider;
 	public GameObject SelectorSquare;
+	public GameObject Ore;
 
 	public int MaxRaiders = 8;
 	public int CreateRaiderQue = 0;
 
 	public int CurrentMenuBarNumber = 3;
 	public Game_Script Game_Script;
+	public IconEdit_Script Icon_Script;
+
 
 	public int CrystalsCollectedCart = 0;
 	public int OreCollectedCart = 0;
@@ -59,6 +62,8 @@ public partial class System_Script : MonoBehaviour
 	void Start()
 	{
 		Game_Script = this.GetComponent<Game_Script>();
+		Icon_Script = this.GetComponent<IconEdit_Script>();
+
 		Initialise();
 	}
 
@@ -82,11 +87,13 @@ public partial class System_Script : MonoBehaviour
 
 		if (MaxRaiders <= RaidersList.Count)
 		{
-			CreateMan_Icon.interactable = false;
+			//CreateMan_Icon.interactable = false;
+			Icon_Script.Enable_CreatMan_I(false);
 		}
 		else
 		{
-			CreateMan_Icon.interactable = true;
+			Icon_Script.Enable_CreatMan_I(true);
+			//CreateMan_Icon.interactable = true;
 		}
 
 		CreateMan_Icon_Text.text = CreateRaiderQue.ToString();
@@ -367,7 +374,7 @@ public partial class System_Script : MonoBehaviour
 		selectedGameObject = null;
 		Object = Point.transform.tag;
 
-		if (Point.transform.tag == "Rock")
+		if (Object == "Rock")
 		{
 			taskable = true;
 			Object = Point.transform.tag;
@@ -379,9 +386,9 @@ public partial class System_Script : MonoBehaviour
 		{
 			CurrentMenuBarNumber = 5;
 			selectedGameObject = Point.collider.gameObject;
-			Debug.Log("dasd");
 		}
 
+		//for objects with colliders below parents
 		if (taskable)
 		{
 			if (Object == "Rock")
@@ -390,12 +397,24 @@ public partial class System_Script : MonoBehaviour
 
 				if (selectedGameObject.GetComponent<Work_Script>().WorkedOn)
 				{
-					Drill_Icon.enabled = false;
+					Icon_Script.Enable_Drill(false);
 				}
 				else
 				{
-					Drill_Icon.enabled = true;
+					Icon_Script.Enable_Drill(true);
 				}
+			}
+		}
+
+		if (Object == "Rubble")
+		{
+			if (selectedGameObject.GetComponent<Work_Script>().WorkedOn)
+			{
+				Icon_Script.Enable_Rubble(false);
+			}
+			else
+			{
+				Icon_Script.Enable_Rubble(true);
 			}
 		}
 	}
