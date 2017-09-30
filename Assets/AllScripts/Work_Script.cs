@@ -78,12 +78,12 @@ public class Work_Script : MonoBehaviour {
 				CreateOre();
 			}
 
-			if (Health < 70 && Health > 35 && OreCreated < 1)
+			if (Health < 70 && Health > 35 && OreCreated < 2)
 			{
 				CreateOre();
 			}
 
-			if (Health < 35 && OreCreated < 2)
+			if (Health < 35 && OreCreated < 3)
 			{
 				CreateOre();
 			}
@@ -145,7 +145,8 @@ public class Work_Script : MonoBehaviour {
 
 		var SpawnPosX = Random.Range(-SpreadX, SpreadX);
 		var SpawnPosY = Random.Range(-SpreadY, SpreadY);
-		var SpawnPos = new Vector3(SpawnPosX, 0, SpawnPosY);
+		var rubblePos = this.transform.position;
+		var SpawnPos = new Vector3(rubblePos.x + SpawnPosX, 0, rubblePos.z + SpawnPosY);
 
 		var newore = Instantiate(System_St.Ore,SpawnPos, Quaternion.identity);
 	}
