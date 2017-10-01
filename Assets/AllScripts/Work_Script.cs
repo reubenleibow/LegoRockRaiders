@@ -122,6 +122,17 @@ public class Work_Script : MonoBehaviour {
 				var Rubble = Instantiate(System_.GetComponent<System_Script>().Rubble, new Vector3(POS.x, 0.1f, POS.z), Quaternion.identity);
 			}
 		}
+
+		foreach(var Unit in System_Script.SelectedGameObjects)
+		{
+			if(Unit.GetComponent<Lego_Character>().TaskObject == this.gameObject)
+			{
+				var legounit = Unit.GetComponent<Lego_Character>();
+				legounit.TaskObject = null;
+				legounit.CurrentTask = CurrentJob.Nothing;
+				legounit.TaskChassis = TaskChassis.Nothing;
+			}
+		}
 	}
 
 	//clear lego unit commands

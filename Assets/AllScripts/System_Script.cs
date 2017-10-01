@@ -179,7 +179,6 @@ public partial class System_Script : MonoBehaviour
 		{
 			Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out dest);
 
-			OnRightClick(dest);
 
 			var destination = dest.point;
 
@@ -191,11 +190,15 @@ public partial class System_Script : MonoBehaviour
 					obj.GetComponent<NavMeshAgent>().SetDestination(destination);
 				}
 			}
+
+			OnRightClick(dest);
+
 		}
 
 		if (Input.GetMouseButtonDown(0))
 		{
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			var OnterrainClick = false;
 
 			if (Physics.Raycast(ray, out dest))
 			{
@@ -211,10 +214,15 @@ public partial class System_Script : MonoBehaviour
 					var Z_ = (Mathf.Round(P.z / 12)) * 12;
 
 					SelectorSquare.transform.position = new Vector3(X_, 0.1f, Z_);
+
+					if(dest.collider.gameObject.transform.tag == "Terrain")
+					{
+						OnterrainClick = true;
+					}
 				}
 			}
 
-			if (selectedGameObject == null && SelectedGameObjects.Count == 0)
+			if (selectedGameObject == null && SelectedGameObjects.Count == 0 && OnterrainClick)
 			{
 				SelectorSquare.SetActive(true);
 				CurrentMenuBarNumber = 5;
@@ -270,6 +278,22 @@ public partial class System_Script : MonoBehaviour
 			{
 				Unit_.CurrentTask = CurrentJob.WanderAroungWithItem;
 			}
+
+			if (Point.transform.tag == "Rubble")
+			{
+				Unit_.TaskChassis = TaskChassis.Drilling;
+				Unit_.CurrentTask = CurrentJob.WalkingToRubble;
+				Unit_.DistFromJob = float.MaxValue;
+				Unit_.TaskObject = Point.collider.gameObject;
+				//-----------------------------------------------------------------------------DODGYCODE
+				if (Unit_.Items.Count > 0)
+				{
+					Unit_.Items[0].GetComponent<Collectable>().DropItem();
+					Unit_.Items.Clear();
+				}
+				var pos = Point.collider.gameObject.transform.position;
+				Unit.GetComponent<NavMeshAgent>().SetDestination(new Vector3(pos.x,0,pos.z));
+			}
 		}
 
 		if (Taskable)
@@ -314,6 +338,8 @@ public partial class System_Script : MonoBehaviour
 
 					}
 				}
+
+				
 
 				var collectable = Object_.GetComponent<Collectable>();
 
@@ -362,7 +388,7 @@ public partial class System_Script : MonoBehaviour
 					}
 				}
 
-				NavMesh.SetDestination(Object_.transform.position);
+				NavMesh.SetDestination(new Vector3(Object_.transform.position.x, 0,Object_.transform.position.z));
 			}
 		}
 	}
