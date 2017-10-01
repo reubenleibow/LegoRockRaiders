@@ -13,14 +13,21 @@ public class IconEdit_Script : MonoBehaviour {
 	public Sprite ClearRubble_Icon_D;
 	public Sprite ClearRubble_Icon_E;
 
+	public Image CrystalsStrip;
+	public Image OreStrip;
+
+	public System_Script Sys_Script;
+
 	// Use this for initialization
 	void Start () {
-		
+		Sys_Script = GameObject.Find("System").GetComponent<System_Script>();
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		
+	void Update ()
+	{
+		CrystalsStrip.rectTransform.sizeDelta = new Vector2(CrystalsStrip.rectTransform.sizeDelta.x,Sys_Script.CrystalsCollectedCart * 34);
+		OreStrip.rectTransform.sizeDelta = new Vector2(OreStrip.rectTransform.sizeDelta.x, Sys_Script.OreCollectedCart * 34);
 	}
 
 	public void Enable_CreatMan_I(bool order)
