@@ -39,7 +39,6 @@ public partial class System_Script : MonoBehaviour
 
 	public GameObject Toolstore;
 	public GameObject Lego_Raider;
-	public GameObject SelectorSquare;
 	public GameObject Ore;
 
 	public int MaxRaiders = 8;
@@ -57,12 +56,15 @@ public partial class System_Script : MonoBehaviour
 
 	public GameObject Rubble;
 
+	public Building_System Building_System;
+
 
 
 	void Start()
 	{
 		Game_Script = this.GetComponent<Game_Script>();
 		Icon_Script = this.GetComponent<IconEdit_Script>();
+		Building_System = this.GetComponent<Building_System>();
 
 		Initialise();
 	}
@@ -107,17 +109,15 @@ public partial class System_Script : MonoBehaviour
 		{
 			CurrentMenuBarNumber = 2;
 		}
-		else if (CurrentMenuBarNumber == 2)
-		{
-			CurrentMenuBarNumber = 1;
-		}
+
+		//if(CurrentMenuBarNumber == 2 && SelectedGameObjects.Count == 0)
+		//{
+		//	CurrentMenuBarNumber = 1;
+		//}
 
 		
 		//---------------------------WorkOn
-		if(selectedGameObject != null || SelectedGameObjects.Count != 0)
-		{
-			SelectorSquare.SetActive(false);
-		}
+
 
 		Update2();
 	}
@@ -198,34 +198,10 @@ public partial class System_Script : MonoBehaviour
 		if (Input.GetMouseButtonDown(0))
 		{
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			var OnterrainClick = false;
 
 			if (Physics.Raycast(ray, out dest))
 			{
 				OnLeftClick(dest);
-			}
-
-			if (selectedGameObject == null)
-			{
-				if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")))
-				{
-					var P = dest.point;
-					var X_ = (Mathf.Round(P.x / 12)) * 12;
-					var Z_ = (Mathf.Round(P.z / 12)) * 12;
-
-					SelectorSquare.transform.position = new Vector3(X_, 0.1f, Z_);
-
-					if(dest.collider.gameObject.transform.tag == "Terrain")
-					{
-						OnterrainClick = true;
-					}
-				}
-			}
-
-			if (selectedGameObject == null && SelectedGameObjects.Count == 0 && OnterrainClick)
-			{
-				SelectorSquare.SetActive(true);
-				CurrentMenuBarNumber = 5;
 			}
 		}
 	}
@@ -252,6 +228,8 @@ public partial class System_Script : MonoBehaviour
 
 	public void OnClick_Back()
 	{
+		Building_System.CurrentBuildingType = BuildingTypes.Nothing;
+		Building_System.CurrentObject = null;
 		CurrentMenuBarNumber = 1;
 	}
 
@@ -397,7 +375,7 @@ public partial class System_Script : MonoBehaviour
 	{
 		var taskable = false;
 		var Object = "";
-		selectedGameObject = null;
+		//selectedGameObject = null;
 		Object = Point.transform.tag;
 
 		if (Object == "Rock")
@@ -408,11 +386,11 @@ public partial class System_Script : MonoBehaviour
 			selectedGameObject = Point.collider.transform.parent.gameObject;
 		}
 
-		if(Point.transform.tag == "Rubble")
-		{
-			CurrentMenuBarNumber = 5;
-			selectedGameObject = Point.collider.gameObject;
-		}
+		//if(Point.transform.tag == "Rubble")
+		//{
+		//	CurrentMenuBarNumber = 5;
+		//	selectedGameObject = Point.collider.gameObject;
+		//}
 
 		//for objects with colliders below parents
 		if (taskable)
@@ -432,17 +410,7 @@ public partial class System_Script : MonoBehaviour
 			}
 		}
 
-		if (Object == "Rubble")
-		{
-			if (selectedGameObject.GetComponent<Work_Script>().WorkedOn)
-			{
-				Icon_Script.Enable_Rubble(false);
-			}
-			else
-			{
-				Icon_Script.Enable_Rubble(true);
-			}
-		}
+		
 	}
 
 	//Work on Code
@@ -466,5 +434,26 @@ public partial class System_Script : MonoBehaviour
 		}
 
 		CurrentMenuBarNumber = 1;
+	}
+
+	public void DropItem()
+	{
+		if(SelectedGameObjects.Count > 0)
+		{
+			foreach(var Unit in SelectedGameObjects)
+			{
+				var Unit_ = Unit.GetComponent<Lego_Character>();
+		
+				if (Unit_.Items.Count > 0)
+				{
+					Unit_.Items[0].GetComponent<Collectable>().DropItem();
+					Unit_.Items.Clear();
+					Unit_.TaskChassis = TaskChassis.Nothing;
+					Unit_.CurrentTask = CurrentJob.Nothing;
+					Unit_.DistFromJob = float.MaxValue;
+					Unit_.TaskObject = null;
+				}
+			}
+		}
 	}
 }

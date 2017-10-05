@@ -391,4 +391,6 @@ public class Lego_Character : MonoBehaviour
 		CurrentTask = CurrentJob.WalkingToRubble;
 		DistFromJob = float.MaxValue;
 	}
+
+
 }

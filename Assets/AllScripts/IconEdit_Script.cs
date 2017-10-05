@@ -16,6 +16,10 @@ public class IconEdit_Script : MonoBehaviour {
 	public Image CrystalsStrip;
 	public Image OreStrip;
 
+	public Button DropItem_Icon;
+	public Button Teleport_Icon;
+
+
 	public System_Script Sys_Script;
 
 	// Use this for initialization

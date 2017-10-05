@@ -19,6 +19,8 @@ public class Work_Script : MonoBehaviour {
 	private GameObject System_;
 	private System_Script System_St;
 	public GridPos RockProperties;
+	public Building_System Building_System;
+
 
 	public int OreCreated = 0;
 
@@ -37,6 +39,7 @@ public class Work_Script : MonoBehaviour {
 	{
 		System_ = GameObject.Find("System");
 		System_St = System_.GetComponent<System_Script>();
+		Building_System = System_.GetComponent<Building_System>();
 	}
 
 	// Update is called once per frame
@@ -100,6 +103,11 @@ public class Work_Script : MonoBehaviour {
 		if (GetComponent<Work_Script>().Worker != null)
 		{
 			ResetLegoUnit();
+
+			if(Building_System.BuildingGrid[X,Y].Object = this.gameObject)
+			{
+				Building_System.FullReset(X, Y);
+			}
 		}
 
 		//Remove from list commands
@@ -120,6 +128,12 @@ public class Work_Script : MonoBehaviour {
 			if (Type == ObjectType.Rock)
 			{
 				var Rubble = Instantiate(System_.GetComponent<System_Script>().Rubble, new Vector3(POS.x, 0.1f, POS.z), Quaternion.identity);
+				Building_System.BuildingGrid[X,Y].B_Types = BuildingTypes.Rubble;
+				Building_System.BuildingGrid[X, Y].Object = Rubble;
+				Rubble.GetComponent<Work_Script>().X = X;
+				Rubble.GetComponent<Work_Script>().Y = Y;
+
+
 			}
 		}
 
@@ -161,4 +175,5 @@ public class Work_Script : MonoBehaviour {
 
 		var newore = Instantiate(System_St.Ore,SpawnPos, Quaternion.identity);
 	}
+
 }
