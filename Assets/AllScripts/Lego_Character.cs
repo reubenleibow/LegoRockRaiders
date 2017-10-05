@@ -12,9 +12,9 @@ public enum CurrentJob
 	WalkToCollectable,
 	CarringCollectable,
 	DropOffCollectable,
-	PutCollectableDownAtCentre,
 	WanderAroungWithItem,
 	ClearingRubble,
+	ConstructionWorker,
 
 }
 
@@ -33,7 +33,8 @@ public enum ExtraCommands
 	Nothing,
 	ReturnCrystal,
 	ReturnOre,
-	FindUnTargetedObjects
+	FindUnTargetedObjects,
+	R_Ore_Crystal,
 }
 
 
@@ -167,7 +168,7 @@ public class Lego_Character : MonoBehaviour
 			}
 
 			//place collectable at base
-			if (CurrentTask == CurrentJob.DropOffCollectable)
+			if (CurrentTask == CurrentJob.DropOffCollectable || CurrentTask == CurrentJob.ConstructionWorker)
 			{
 				if(TaskObject != null)
 				{
@@ -175,7 +176,6 @@ public class Lego_Character : MonoBehaviour
 
 					if (distance <= 2)
 					{
-						CurrentTask = CurrentJob.PutCollectableDownAtCentre;
 						PutCollectableDownAtBase();
 					}
 				}
@@ -231,41 +231,84 @@ public class Lego_Character : MonoBehaviour
 
 	public void FindNearestCollectableDropOff()
 	{
-		if(ItemType == CollectableType.Crystal)
+		var set = false;
+
+		if(System_Script.ConstructionSites.Count > 0 && !set)
+		{
+			var shortestPath = this.ShortestPath(System_Script.ConstructionSites, ExtraCommands.R_Ore_Crystal);
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+
+			if(shortestPath.Length != float.MaxValue)
+			{
+				set = true;
+				CurrentTask = CurrentJob.ConstructionWorker;
+			}
+		}
+
+		if (ItemType == CollectableType.Crystal && !set)
 		{
 			var shortestPath = this.ShortestPath(System_Script.AllBuildings, ExtraCommands.ReturnCrystal);
 			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+
+			if (shortestPath.Length != float.MaxValue)
+			{
+				set = true;
+				CurrentTask = CurrentJob.DropOffCollectable;
+			}
+
 		}
 
-		if (ItemType == CollectableType.Ore)
+		if (ItemType == CollectableType.Ore && !set)
 		{
 			var shortestPath = this.ShortestPath(System_Script.AllBuildings, ExtraCommands.ReturnOre);
 			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+
+			if (shortestPath.Length != float.MaxValue)
+			{
+				set = true;
+				CurrentTask = CurrentJob.DropOffCollectable;
+			}
+
 		}
 
-		CurrentTask = CurrentJob.DropOffCollectable;
 	}
 
 	//put crystal away
 	public void PutCollectableDownAtBase()
 	{
-		CurrentTask = CurrentJob.Nothing;
 
-		if(Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Crystal)
+		if(CurrentTask != CurrentJob.ConstructionWorker)
 		{
-			SystemSrpt.CrystalsCollectedCart++;
-			TaskChassis = TaskChassis.GatherCrystals;
-		}
+			if (Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Crystal)
+			{
+				SystemSrpt.CrystalsCollectedCart++;
+				TaskChassis = TaskChassis.GatherCrystals;
+			}
 
-		if (Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Ore)
-		{
-			SystemSrpt.OreCollectedCart++;
-			TaskChassis = TaskChassis.GatherOre;
+			if (Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Ore)
+			{
+				SystemSrpt.OreCollectedCart++;
+				TaskChassis = TaskChassis.GatherOre;
+			}
 		}
+		else
+		{
+			if (Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Ore)
+			{
+				TaskObject.GetComponent<Construction_Script>().Contained_Ore++;
+			}
+
+			if (Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Crystal)
+			{
+				TaskObject.GetComponent<Construction_Script>().Contained_Crystal++;
+			}
+		}
+		
 
 		Destroy(Items[0]);
 		Items.Clear();
 
+		CurrentTask = CurrentJob.Nothing;
 		TaskChassis = TaskChassis.Nothing;
 	}
 
@@ -276,8 +319,8 @@ public class Lego_Character : MonoBehaviour
 		//if the player is wandering with an Item in hand and has reched the end of its journey set by player then find a place to drop it off
 		if(CurrentTask == CurrentJob.WanderAroungWithItem && ItemType != CollectableType.Nothing && run)
 		{
-			FindNearestCollectableDropOff();
 			CurrentTask = CurrentJob.DropOffCollectable;
+			FindNearestCollectableDropOff();
 			run = false;
 		}
 

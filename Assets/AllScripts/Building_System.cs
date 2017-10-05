@@ -7,22 +7,14 @@ public enum BuildingTypes
 	Nothing,
 	PowerPathBegin,
 	PowerPathComplete,
-	Rubble
+	Rubble,
+	Rock,
+
 }
 public class TerainAdditions
 {
-	//BuildingTypes BuildingTypes;
-	//GameObject GameObject;
-
 	public BuildingTypes B_Types = BuildingTypes.Nothing;
 	public GameObject Object = null;
-
-
-	//TerainAdditions()
-	//{
-	//	B_Types = BuildingTypes.Nothing;
-	//	Object = null;
-	//}
 }
 
 public class Building_System : MonoBehaviour {
@@ -34,6 +26,8 @@ public class Building_System : MonoBehaviour {
 
 	public System_Script System_Script;
 	public IconEdit_Script IconEdit_Script;
+	public AllBuildings AllBuildings_Script;
+
 
 	public int Clicked_X;
 	public int Clicked_Z;
@@ -51,6 +45,7 @@ public class Building_System : MonoBehaviour {
 	{
 		System_Script = this.GetComponent<System_Script>();
 		IconEdit_Script = this.GetComponent<IconEdit_Script>();
+		AllBuildings_Script = this.GetComponent<AllBuildings>();
 
 		for (int iX = 0; iX < Rows; iX++)
 		{
@@ -66,17 +61,26 @@ public class Building_System : MonoBehaviour {
 	{
 
 		RaycastHit dest;
+		var cancel = false;
 
 		if (Input.GetMouseButtonDown(0))
 		{
-			
+			Ray ray0 = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+			if (Physics.Raycast(ray0, out dest))
+			{
+				if(dest.collider.gameObject.transform.tag == "Rock")
+				{
+					cancel = true;
+				}
+			}
 
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			var OnterrainClick = false;
 
 			//if (System_Script.selectedGameObject == null)
 			//{
-				if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")))
+				if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")) && !cancel)
 				{
 					var P = dest.point;
 					var X_ = (Mathf.Round(P.x / SelectorSize)) * SelectorSize;
@@ -157,10 +161,11 @@ public class Building_System : MonoBehaviour {
 
 	public void On_PowerPath_Click()
 	{
-		if(CurrentBuildingType == BuildingTypes.Nothing)
-		{
+		var newPowerPath = Instantiate(AllBuildings_Script.PowerPathBegin, new Vector3(Clicked_X * SelectorSize, 0.1f, Clicked_Z * SelectorSize), Quaternion.identity);
 
-		}
+		BuildingGrid[Clicked_X, Clicked_Z].Object = newPowerPath;
+		BuildingGrid[Clicked_X, Clicked_Z].B_Types = BuildingTypes.PowerPathBegin;
+
 	}
 
 	public void FullReset(int X, int Z)

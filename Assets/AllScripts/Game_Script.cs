@@ -66,6 +66,7 @@ public class Game_Script : MonoBehaviour
 
 	public float RockWidth = 12;
 	private float RockHeight = 8;
+	private Building_System Building_System;
 
 	public GridPos[,] RockGridNumbers = new GridPos[Rows, Columns];
 	//public int[,] RockGridObjects = new int[100, 100];
@@ -73,6 +74,8 @@ public class Game_Script : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
+		Building_System = this.GetComponent<Building_System>();
+
 		for (int iX = 0; iX < Rows; iX++)
 		{
 			for (int iY = 0; iY < Columns; iY++)
@@ -102,6 +105,10 @@ public class Game_Script : MonoBehaviour
 					{
 						RockGridNumbers[x, y].RockType = RockType.SoftRock;
 					}
+
+					//Building_System.BuildingGrid[x,y].Object = this.gameObject;
+					//Building_System.BuildingGrid[x, y].B_Types = BuildingTypes.Rock;
+
 				}
 			}
 		}

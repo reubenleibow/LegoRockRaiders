@@ -47,8 +47,28 @@ public static class Utillity_Script
 	}
 
 	//Then come here and do this event multiple times----->
-	public static NavMeshPathEx CalculatePath(this Lego_Character character, GameObject destination, ExtraCommands ExtraCommands)
+	public static NavMeshPathEx ChosePathDestChasis(this Lego_Character character, GameObject destination, ExtraCommands ExtraCommands)
 	{
+		var Man = character.GetComponent<Lego_Character>();
+
+		if (ExtraCommands == ExtraCommands.R_Ore_Crystal)
+		{
+			if(Man.ItemType == CollectableType.Crystal)
+			{
+				if (destination.GetComponent<Construction_Script>().Crystal_Worker)
+				{
+					return CalculatePath(character, destination);
+				}
+			}
+
+			if (Man.ItemType == CollectableType.Ore)
+			{
+				if (destination.GetComponent<Construction_Script>().Ore_Worker)
+				{
+					return CalculatePath(character, destination);
+				}
+			}
+		}
 
 		if (ExtraCommands == ExtraCommands.ReturnCrystal)
 		{
@@ -95,30 +115,41 @@ public static class Utillity_Script
 		};
 	}
 
-	public static NavMeshPathEx ShortestPath(this Lego_Character LegoUnit, List<GameObject> listOfGameObjects)
-	{
-		// get all the paths
-		var results = listOfGameObjects.Select(dest => LegoUnit.CalculatePath(dest));
-	
-		// get the shortest path after sorting (shortest at the top)
-		var shortest = results.OrderBy(r => r.Length).FirstOrDefault();
-
-		// get the actual mesh path
-		return shortest;
-	}
-
 	//first come here and dp this event----->
 	public static NavMeshPathEx ShortestPath(this Lego_Character LegoUnit, List<GameObject> listOfGameObjects, ExtraCommands ExtraCommands)
 	{
-		var results = listOfGameObjects.Select(dest => LegoUnit.CalculatePath(dest, ExtraCommands)).ToArray();
+		var results = listOfGameObjects.Select(dest => LegoUnit.ChosePathDestChasis(dest, ExtraCommands)).ToArray();
 		var shortest = results.OrderBy(r => r.Length).FirstOrDefault();
+		var Man = LegoUnit.GetComponent<Lego_Character>();
 
 		//make sure that the length of the closest object is not max(could be a fake route)
-		if(ExtraCommands == ExtraCommands.FindUnTargeted && shortest.Object.GetComponent<Collectable>().Collector == null && shortest.Length != float.MaxValue)
+		//look for construction sites
+		if (ExtraCommands == ExtraCommands.R_Ore_Crystal)
 		{
-			shortest.Object.GetComponent<Collectable>().Collector = LegoUnit.gameObject;
+			if (shortest.Length != float.MaxValue)
+			{
+				if(Man.ItemType == CollectableType.Ore)
+				{
+					shortest.Object.GetComponent<Construction_Script>().Workerlist_Ore.Add(LegoUnit.gameObject);
+				}
+
+				if (Man.ItemType == CollectableType.Crystal)
+				{
+					shortest.Object.GetComponent<Construction_Script>().Workerlist_Crystal.Add(LegoUnit.gameObject);
+				}
+			}
 		}
 
+		//FindUnTArgeted is for collectables
+		if (ExtraCommands == ExtraCommands.FindUnTargeted)
+		{
+			if(shortest.Object.GetComponent<Collectable>().Collector == null && shortest.Length != float.MaxValue)
+			{
+				shortest.Object.GetComponent<Collectable>().Collector = LegoUnit.gameObject;
+			}
+		}
+
+		//FindUnTargetedObjects is for work jobs like drilling and rubble
 		if (ExtraCommands == ExtraCommands.FindUnTargetedObjects)
 		{
 

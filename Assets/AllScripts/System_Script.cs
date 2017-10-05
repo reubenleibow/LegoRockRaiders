@@ -16,6 +16,7 @@ public partial class System_Script : MonoBehaviour
 	public static List<GameObject> AllOre = new List<GameObject>();
 	public static List<GameObject> DrillRocks = new List<GameObject>();
 	public static List<GameObject> ClearRubble = new List<GameObject>();
+	public static List<GameObject> ConstructionSites = new List<GameObject>();
 
 
 
