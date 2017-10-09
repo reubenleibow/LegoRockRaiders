@@ -142,6 +142,11 @@ public class Building_System : MonoBehaviour {
 			System_Script.CurrentMenuBarNumber = 5;
 		}
 
+		if (CurrentBuildingType == BuildingTypes.PowerPathBegin)
+		{
+			System_Script.CurrentMenuBarNumber = 6;
+		}
+
 	}
 
 	public void UpdateIcons()
@@ -166,6 +171,41 @@ public class Building_System : MonoBehaviour {
 		BuildingGrid[Clicked_X, Clicked_Z].Object = newPowerPath;
 		BuildingGrid[Clicked_X, Clicked_Z].B_Types = BuildingTypes.PowerPathBegin;
 
+		System_Script.CurrentMenuBarNumber = 1;
+
+	}
+
+	public void On_Click_CancelBuilding()
+	{
+		var Object_ = BuildingGrid[Clicked_X, Clicked_Z].Object;
+		var ObectScript = Object_.GetComponent<Construction_Script>();
+		var X_ = Object_.transform.position.x;
+		var Z_ = Object_.transform.position.z;
+
+
+		if (ObectScript.Contained_Crystal > 0)
+		{
+			for (int i = 0; i < ObectScript.Contained_Crystal; i++)
+			{
+				//var newCrystal = Instantiate(System_Script.cry, new Vector3(X_ + Random.Range(-2,2) , 0.1f , Z_ + Random.Range(-2, 2)), Quaternion.identity);
+			}
+		}
+
+		if (ObectScript.Contained_Ore > 0)
+		{
+			for (int i = 0; i < ObectScript.Contained_Ore; i++)
+			{
+				var newCrystal = Instantiate(System_Script.Ore, new Vector3(X_ + Random.Range(-2, 2), 0.1f, Z_ + Random.Range(-2, 2)), Quaternion.identity);
+			}
+		}
+
+		RemoveFromList(Object_);
+
+		Destroy(Object_);
+
+		FullReset(Clicked_X, Clicked_Z);
+
+		System_Script.CurrentMenuBarNumber = 1;
 	}
 
 	public void FullReset(int X, int Z)
@@ -183,6 +223,13 @@ public class Building_System : MonoBehaviour {
 		BuildingGrid[X, Z].Object = null;
 		BuildingGrid[X, Z].B_Types = BuildingTypes.Nothing;
 	}
-
+	
+	public void RemoveFromList(GameObject Object)
+	{
+		if(System_Script.ConstructionSites.Contains(Object))
+		{
+			System_Script.ConstructionSites.Remove(Object);
+		}
+	}
 
 }

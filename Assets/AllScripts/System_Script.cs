@@ -72,6 +72,7 @@ public partial class System_Script : MonoBehaviour
 
 	void Update()
 	{
+		//Debug.Log(Con.Count);
 		SelectObjects();
 
 		foreach (var obj in AllSelectableGameObjects.ToArray())

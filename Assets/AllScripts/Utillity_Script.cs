@@ -53,7 +53,7 @@ public static class Utillity_Script
 
 		if (ExtraCommands == ExtraCommands.R_Ore_Crystal)
 		{
-			if(Man.ItemType == CollectableType.Crystal)
+			if(Man.ItemType == CollectableType.Crystal && destination != null)
 			{
 				if (destination.GetComponent<Construction_Script>().Crystal_Worker)
 				{

@@ -11,6 +11,8 @@ partial class System_Script
 	public Image Menu_3_Background;
 	public Image Menu_4_Background;
 	public Image Menu_5_Background;
+	public Image Menu_6_Background;
+
 
 
 
@@ -27,6 +29,8 @@ partial class System_Script
 			Menu_3_Background.gameObject,
 			Menu_4_Background.gameObject,
 			Menu_5_Background.gameObject,
+			Menu_6_Background.gameObject,
+
 
 
 
