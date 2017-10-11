@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+
 public class Construction_Script : MonoBehaviour {
 
 	public List<GameObject> Workerlist_Ore = new List<GameObject>();
@@ -26,13 +28,17 @@ public class Construction_Script : MonoBehaviour {
 
 	public AllBuildings AllBuildings;
 	public Building_System Building_System;
+	public GameObject systemObj;
+
+	public ConstructionTypes ConstructionType = ConstructionTypes.Nothing;
 
 
 	// Use this for initialization
 	void Start ()
 	{
-		AllBuildings = GameObject.Find("System").GetComponent<AllBuildings>();
-		Building_System = GameObject.Find("System").GetComponent<Building_System>();
+		systemObj = GameObject.Find("System");
+		AllBuildings = systemObj.GetComponent<AllBuildings>();
+		Building_System = systemObj.GetComponent<Building_System>();
 
 	}
 
@@ -134,12 +140,20 @@ public class Construction_Script : MonoBehaviour {
 			System_Script.ConstructionSites.Remove(this.gameObject);
 		}
 
-		Destroy(this.gameObject);
+		//if(ConstructionType == ConstructionTypes.PowerPath)
+		//{
+			Destroy(this.gameObject);
+		//}
+
+		//if(ConstructionType == ConstructionTypes.ToolStore)
+		//{
+
+		//}
 	}
 
 	public void OnDestroy()
 	{
-		if(CompletedConstruction)
+		if(CompletedConstruction && ConstructionType == ConstructionTypes.PowerPath)
 		{
 			var newPowerpathcomplete = Instantiate(AllBuildings.PowerPathComplete, this.transform.position, Quaternion.identity);
 			var X = Mathf.Round(this.transform.position.x / 12);
@@ -147,6 +161,17 @@ public class Construction_Script : MonoBehaviour {
 
 			Building_System.BuildingGrid[(int)X, (int)Z].Object = newPowerpathcomplete;
 			Building_System.BuildingGrid[(int)X, (int)Z].B_Types = BuildingTypes.PowerPathComplete;
+		}
+
+		if (CompletedConstruction && ConstructionType == ConstructionTypes.ToolStore)
+		{
+			var script = systemObj.GetComponent<Building_System>();
+			var script1 = systemObj.GetComponent<StartConstruction>();
+
+			Debug.Log(script1.ExtraPath);
+
+			var building = Instantiate(script.ToolStore, this.transform.position, Quaternion.identity);
+			var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
 
 		}
 	}

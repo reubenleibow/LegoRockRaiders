@@ -233,6 +233,7 @@ public partial class System_Script : MonoBehaviour
 		Building_System.CurrentBuildingType = BuildingTypes.Nothing;
 		Building_System.CurrentObject = null;
 		CurrentMenuBarNumber = 1;
+		this.GetComponent<StartConstruction>().OnBackClicked();
 	}
 
 	public void OnClick_Buid()

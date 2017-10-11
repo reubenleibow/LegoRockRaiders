@@ -39,6 +39,8 @@ public class Building_System : MonoBehaviour {
 	public bool Inbounds = false;
 
 
+	public GameObject ToolStore;
+
 
 	// Use this for initialization
 	void Start ()
@@ -168,6 +170,7 @@ public class Building_System : MonoBehaviour {
 	{
 		var newPowerPath = Instantiate(AllBuildings_Script.PowerPathBegin, new Vector3(Clicked_X * SelectorSize, 0.1f, Clicked_Z * SelectorSize), Quaternion.identity);
 
+		newPowerPath.GetComponent<Construction_Script>().ConstructionType = ConstructionTypes.PowerPath;
 		BuildingGrid[Clicked_X, Clicked_Z].Object = newPowerPath;
 		BuildingGrid[Clicked_X, Clicked_Z].B_Types = BuildingTypes.PowerPathBegin;
 
