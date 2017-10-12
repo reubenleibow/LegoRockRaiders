@@ -73,7 +73,7 @@ public static class Utillity_Script
 			{
 				if (destination.GetComponent<Construction_Script>().Stops_Worker)
 				{
-					//foreach (var stop in destination.GetComponent<Construction_Script>().RequiredStopsList)
+					//foreach (var stop in destination.GetComponent<Construction_Script>().RequiredStopsListPoints)
 					//{
 						//yield return CalculatePath(character, stop);
 					//}

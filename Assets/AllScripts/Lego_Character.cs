@@ -16,6 +16,7 @@ public enum CurrentJob
 	ClearingRubble,
 	ConstructionWorker,
 
+
 }
 
 public enum TaskChassis
@@ -26,6 +27,8 @@ public enum TaskChassis
 	Nothing,
 	JWalking,
 	Drilling,
+	PackAwwayJunk,
+
 }
 
 public enum ExtraCommands
@@ -39,8 +42,6 @@ public enum ExtraCommands
 	FindUnTargetedObjects,
 	//used for construction
 	R_Ore_Crystal,
-	//used for construction
-	PlaceStops,
 }
 
 
@@ -65,7 +66,7 @@ public class Lego_Character : MonoBehaviour
 	//Propeties
 	public bool UnSelectable = false;
 	public bool CanDrill = true;
-	private int DrillStrength = 10;
+	private int DrillStrength = 50;
 	public bool Arrived = false;
 
 
@@ -185,17 +186,33 @@ public class Lego_Character : MonoBehaviour
 					PutCollectableDownAtBase();
 				}
 
-				//stops drop off
-				if (ItemType == CollectableType.Stops )
+				if (distance <= 2 && ItemType == CollectableType.Stops && TaskChassis == TaskChassis.PackAwwayJunk)
 				{
-					var index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
-					var StopPoint = TaskObject.GetComponent<Construction_Script>().RequiredStopsList[index];
-					var distanceToStop = Vector3.Distance(transform.position, StopPoint.transform.position);
-					this.GetComponent<NavMeshAgent>().SetDestination(StopPoint.transform.position);
+					PutCollectableDownAtBase();
+				}
 
-					if (distanceToStop <= 1)
+				//stops drop off
+				if (ItemType == CollectableType.Stops && TaskChassis == TaskChassis.GatherStops)
+				{
+					var index = 0;
+
+					if (TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.Contains(this.gameObject))
 					{
-						placeStopDown();
+						//var StopPoint = new GameObject();
+
+						index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
+
+						if(index < TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints.Count)
+						{
+							var StopPoint = TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints[index];
+							var distanceToStop = Vector3.Distance(transform.position, StopPoint.transform.position);
+							this.GetComponent<NavMeshAgent>().SetDestination(StopPoint.transform.position);
+
+							if (distanceToStop <= 1)
+							{
+								placeStopDown();
+							}
+						}
 					}
 				}
 			}
@@ -247,29 +264,43 @@ public class Lego_Character : MonoBehaviour
 		ItemType = TaskObject.GetComponent<Collectable>().CollectableType;
 		FindNearestCollectableDropOff();
 	}
-
+	//Pick up resources-------------------------------------------------------------------------------------------------------------------------------------------
 	public void FindNearestCollectableDropOff()
 	{
 		var set = false;
 
-		if(System_Script.ConstructionSites.Count > 0 && !set)
+		if (System_Script.ConstructionSites.Count > 0 && !set)
 		{
 			var shortestPath = this.ShortestPath(System_Script.ConstructionSites, ExtraCommands.R_Ore_Crystal);
 			GetComponent<NavMeshAgent>().SetPath(shortestPath);
 
-			if(ItemType == CollectableType.Stops)
+			if(SystemSrpt.TotalStopsNeeded > 0 && ItemType == CollectableType.Stops)
 			{
 				var index = shortestPath.Object.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
-				var point = shortestPath.Object.GetComponent<Construction_Script>().RequiredStopsList[index];
-				GetComponent<NavMeshAgent>().SetDestination(point.transform.position);
+				var point = shortestPath.Object.GetComponent<Construction_Script>().RequiredStopsListPoints[index];
+				SystemSrpt.TotalStopsNeeded--;
 			}
 
-			if(shortestPath.Length != float.MaxValue)
+			if (shortestPath.Length != float.MaxValue)
 			{
 				set = true;
 				CurrentTask = CurrentJob.ConstructionWorker;
 			}
 		}
+
+		if (SystemSrpt.TotalStopsNeeded <= 0 && !set && System_Script.AllStops.Count > 0)
+		{
+			var shortestPath = this.ShortestPath(System_Script.ListOfAllToolStores, ExtraCommands.ReturnCrystal);
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+
+			if (shortestPath.Length != float.MaxValue)
+			{
+				set = true;
+				TaskChassis = TaskChassis.PackAwwayJunk;
+				CurrentTask = CurrentJob.DropOffCollectable;
+			}
+		}
+
 
 		if (ItemType == CollectableType.Crystal && !set)
 		{
@@ -294,9 +325,7 @@ public class Lego_Character : MonoBehaviour
 				set = true;
 				CurrentTask = CurrentJob.DropOffCollectable;
 			}
-
 		}
-
 	}
 
 	//put crystal away
@@ -331,11 +360,14 @@ public class Lego_Character : MonoBehaviour
 			}
 		}
 
-		Destroy(Items[0]);
-		Items.Clear();
+		if(Items.Count > 0)
+		{
+			Destroy(Items[0]);
+			Items.Clear();
 
-		CurrentTask = CurrentJob.Nothing;
-		TaskChassis = TaskChassis.Nothing;
+			CurrentTask = CurrentJob.Nothing;
+			TaskChassis = TaskChassis.Nothing;
+		}
 	}
 
 	public void placeStopDown()
@@ -347,7 +379,7 @@ public class Lego_Character : MonoBehaviour
 
 			System_Script.CollectableStops.Remove(Items[0]);
 			var index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
-			TaskObject.GetComponent<Construction_Script>().RequiredStopsList.RemoveAt(index);
+			TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints.RemoveAt(index);
 		}
 
 		Destroy(Items[0]);
@@ -355,6 +387,9 @@ public class Lego_Character : MonoBehaviour
 
 		CurrentTask = CurrentJob.Nothing;
 		TaskChassis = TaskChassis.Nothing;
+		ItemType = CollectableType.Nothing;
+		//ItemType = I.Nothing;
+
 	}
 
 	public void ArrivedAtDest()

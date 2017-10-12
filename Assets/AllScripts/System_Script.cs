@@ -13,16 +13,17 @@ public partial class System_Script : MonoBehaviour
 	public static List<GameObject> ListOfAllPowerStations = new List<GameObject>();
 	public static List<GameObject> AllBuildings = new List<GameObject>();
 
+	//actual collectable gameobjects currently in the game being played
 	public static List<GameObject> AllCrystals = new List<GameObject>();
 	public static List<GameObject> AllOre = new List<GameObject>();
 	public static List<GameObject> AllStops = new List<GameObject>();
 
+	//larger projects that are selected and set for raiders to work on.
 	public static List<GameObject> DrillRocks = new List<GameObject>();
 	public static List<GameObject> ClearRubble = new List<GameObject>();
 	public static List<GameObject> ConstructionSites = new List<GameObject>();
 
-
-
+	// all collectables that are free, as in not assigned to any workers
 	public static List<GameObject> CollectableOre = new List<GameObject>();
 	public static List<GameObject> CollectableCrystals = new List<GameObject>();
 	public static List<GameObject> CollectableStops = new List<GameObject>();
@@ -63,6 +64,7 @@ public partial class System_Script : MonoBehaviour
 	public GameObject Rubble;
 
 	public Building_System Building_System;
+	public int TotalStopsNeeded = 0;
 
 
 
@@ -77,7 +79,15 @@ public partial class System_Script : MonoBehaviour
 
 	void Update()
 	{
-		//Debug.Log(Con.Count);
+		TotalStopsNeeded = 0;
+		foreach (var item in ConstructionSites.ToArray())
+		{
+			var script = item.GetComponent<Construction_Script>();
+			var stopsNo = script.Required_Stops - (script.Contained_Stops + script.Workerlist_Stops.Count );
+
+			TotalStopsNeeded = +stopsNo;
+		}
+
 		SelectObjects();
 
 		foreach (var obj in AllSelectableGameObjects.ToArray())
@@ -116,15 +126,6 @@ public partial class System_Script : MonoBehaviour
 		{
 			CurrentMenuBarNumber = 2;
 		}
-
-		//if(CurrentMenuBarNumber == 2 && SelectedGameObjects.Count == 0)
-		//{
-		//	CurrentMenuBarNumber = 1;
-		//}
-
-		
-		//---------------------------WorkOn
-
 
 		Update2();
 	}

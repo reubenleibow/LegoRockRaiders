@@ -10,7 +10,7 @@ public class Construction_Script : MonoBehaviour {
 	public List<GameObject> Workerlist_Crystal = new List<GameObject>();
 	public List<GameObject> Workerlist_Stops = new List<GameObject>();
 	//pre made up of emptygame objects on path
-	public List<GameObject> RequiredStopsList = new List<GameObject>();
+	public List<GameObject> RequiredStopsListPoints = new List<GameObject>();
 
 	public int Required_Ore = 2;
 	public int Required_Crystal = 0;
@@ -49,10 +49,10 @@ public class Construction_Script : MonoBehaviour {
 
 		if(ConstructionType == ConstructionTypes.Teleportpad)
 		{
-			RequiredStopsList.Add(StopPoint1);
-			RequiredStopsList.Add(StopPoint2);
-			RequiredStopsList.Add(StopPoint3);
-			RequiredStopsList.Add(StopPoint4);
+			RequiredStopsListPoints.Add(StopPoint1);
+			RequiredStopsListPoints.Add(StopPoint2);
+			RequiredStopsListPoints.Add(StopPoint3);
+			RequiredStopsListPoints.Add(StopPoint4);
 		}
 	}
 
@@ -140,7 +140,7 @@ public class Construction_Script : MonoBehaviour {
 			Completed();
 		}
 
-		//if(RequiredStopsList )
+		//if(RequiredStopsListPoints )
 	}
 
 	public void PlaceOre()

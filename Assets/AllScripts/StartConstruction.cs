@@ -55,7 +55,9 @@ public class StartConstruction : MonoBehaviour {
 
 		if (B_Type != BuildingGroundType.blank)
 		{
-			if(Input.GetMouseButtonDown(0))
+			var Construction = new Construction_Script();
+
+			if (Input.GetMouseButtonDown(0))
 			{
 				foreach (var square in BuildingSquareList.ToArray())
 				{
@@ -69,7 +71,7 @@ public class StartConstruction : MonoBehaviour {
 					if (name == "Y")
 					{
 						var newPath = Instantiate(BasePath, square.transform.position, Quaternion.identity);
-						var Construction = newPath.GetComponent<Construction_Script>();
+						Construction = newPath.GetComponent<Construction_Script>();
 
 						Construction.ConstructionType = ConstructionTypes;
 
@@ -130,7 +132,7 @@ public class StartConstruction : MonoBehaviour {
 		B_Type = BuildingGroundType.one_one;
 		ConstructionTypes = ConstructionTypes.Teleportpad;
 		CreateBuildingSquare(1, 1);
-		SetRequirements(0, 0, 4);
+		SetRequirements(8, 0, 4);
 	}
 
 	public void CreateBuildingSquare(int Green, int Yellow)
