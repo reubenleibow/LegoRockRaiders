@@ -5,6 +5,7 @@ public enum CollectableType
 {
 	Ore,
 	Crystal,
+	Stops,
 	Nothing
 }
 
@@ -28,6 +29,8 @@ public class Collectable : MonoBehaviour {
 		if (CollectableType == CollectableType.Ore)
 			System_Script.AllOre.Add(this.gameObject);
 
+		if (CollectableType == CollectableType.Stops)
+			System_Script.AllStops.Add(this.gameObject);
 
 		//System_Script.CollectableCrystals.Add(this.gameObject);
 
@@ -45,7 +48,7 @@ public class Collectable : MonoBehaviour {
 			{
 				if(System_Script.CollectableCrystals.Contains(this.gameObject))
 				{
-					System_Script.CollectableCrystals.Remove(this.gameObject);
+				//	System_Script.CollectableCrystals.Remove(this.gameObject);
 				}
 			}
 
@@ -76,8 +79,6 @@ public class Collectable : MonoBehaviour {
 				{
 					Contains = true;
 				}
-
-
 			}
 
 			if(!Contains)
@@ -105,6 +106,14 @@ public class Collectable : MonoBehaviour {
 					System_Script.CollectableOre.Add(this.gameObject);
 				}
 			}
+
+			if (CollectableType == CollectableType.Stops)
+			{
+				if (!System_Script.CollectableStops.Contains(this.gameObject))
+				{
+					System_Script.CollectableStops.Add(this.gameObject);
+				}
+			}
 		}
 	}
 
@@ -126,6 +135,12 @@ public class Collectable : MonoBehaviour {
 		{
 			System_Script.AllOre.Remove(this.gameObject);
 			System_Script.CollectableOre.Remove(this.gameObject);
+		}
+
+		if (CollectableType == CollectableType.Stops)
+		{
+			System_Script.CollectableStops.Remove(this.gameObject);
+			System_Script.AllStops.Remove(this.gameObject);
 		}
 	}
 	

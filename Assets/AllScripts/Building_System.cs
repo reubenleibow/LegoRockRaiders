@@ -40,6 +40,9 @@ public class Building_System : MonoBehaviour {
 
 
 	public GameObject ToolStore;
+	public GameObject Teleportpad;
+	public GameObject Stops;
+
 
 
 	// Use this for initialization

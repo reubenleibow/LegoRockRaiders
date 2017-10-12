@@ -47,17 +47,17 @@ public static class Utillity_Script
 	}
 
 	//Then come here and do this event multiple times----->
-	public static NavMeshPathEx ChosePathDestChasis(this Lego_Character character, GameObject destination, ExtraCommands ExtraCommands)
+	public static IEnumerable<NavMeshPathEx> ChosePathDestChasis(this Lego_Character character, GameObject destination, ExtraCommands ExtraCommands)
 	{
 		var Man = character.GetComponent<Lego_Character>();
 
 		if (ExtraCommands == ExtraCommands.R_Ore_Crystal)
 		{
-			if(Man.ItemType == CollectableType.Crystal && destination != null)
+			if(Man.ItemType == CollectableType.Crystal)
 			{
 				if (destination.GetComponent<Construction_Script>().Crystal_Worker)
 				{
-					return CalculatePath(character, destination);
+					yield return CalculatePath(character, destination);
 				}
 			}
 
@@ -65,16 +65,29 @@ public static class Utillity_Script
 			{
 				if (destination.GetComponent<Construction_Script>().Ore_Worker)
 				{
-					return CalculatePath(character, destination);
+					yield return CalculatePath(character, destination);
+				}
+			}
+
+			if (Man.ItemType == CollectableType.Stops)
+			{
+				if (destination.GetComponent<Construction_Script>().Stops_Worker)
+				{
+					//foreach (var stop in destination.GetComponent<Construction_Script>().RequiredStopsList)
+					//{
+						//yield return CalculatePath(character, stop);
+					//}
+					yield return CalculatePath(character, destination);
 				}
 			}
 		}
 
+		//under is for returning ore + crystals
 		if (ExtraCommands == ExtraCommands.ReturnCrystal)
 		{
 			if (destination.GetComponent<Building_Script>().CanTakeCrystal)
 			{
-				return CalculatePath(character, destination);
+				yield return CalculatePath(character, destination);
 			}
 		}
 
@@ -82,7 +95,7 @@ public static class Utillity_Script
 		{
 			if (destination.GetComponent<Building_Script>().CanTakeOre)
 			{
-				return CalculatePath(character, destination);
+				yield return CalculatePath(character, destination);
 			}
 		}
 
@@ -91,7 +104,7 @@ public static class Utillity_Script
 		{
 			if (destination.GetComponent<Collectable>().Collector == null)
 			{
-				return CalculatePath(character, destination);
+				yield return CalculatePath(character, destination);
 			}
 		}
 
@@ -101,13 +114,13 @@ public static class Utillity_Script
 			{
 				if (destination.GetComponent<Work_Script>().Worker == null)
 				{
-					return CalculatePath(character, destination);
+					yield return CalculatePath(character, destination);
 				}
 			}
 		}
 
 		//No path found
-		return new NavMeshPathEx
+		yield return new NavMeshPathEx
 		{
 			NavPath = new NavMeshPath(),
 			Length = float.MaxValue,
@@ -118,7 +131,7 @@ public static class Utillity_Script
 	//first come here and dp this event----->
 	public static NavMeshPathEx ShortestPath(this Lego_Character LegoUnit, List<GameObject> listOfGameObjects, ExtraCommands ExtraCommands)
 	{
-		var results = listOfGameObjects.Select(dest => LegoUnit.ChosePathDestChasis(dest, ExtraCommands)).ToArray();
+		var results = listOfGameObjects.SelectMany(dest => LegoUnit.ChosePathDestChasis(dest, ExtraCommands)).ToArray();
 		var shortest = results.OrderBy(r => r.Length).FirstOrDefault();
 		var Man = LegoUnit.GetComponent<Lego_Character>();
 
@@ -138,7 +151,13 @@ public static class Utillity_Script
 					shortest.Object.GetComponent<Construction_Script>().Workerlist_Crystal.Add(LegoUnit.gameObject);
 				}
 			}
+
+			if (shortest.Length != float.MaxValue)
+			{
+				shortest.Object.GetComponent<Construction_Script>().Workerlist_Stops.Add(LegoUnit.gameObject);
+			}
 		}
+
 
 		//FindUnTArgeted is for collectables
 		if (ExtraCommands == ExtraCommands.FindUnTargeted)

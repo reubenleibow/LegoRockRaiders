@@ -21,6 +21,7 @@ public enum CurrentJob
 public enum TaskChassis
 {
 	GatherOre,
+	GatherStops,
 	GatherCrystals,
 	Nothing,
 	JWalking,
@@ -29,12 +30,17 @@ public enum TaskChassis
 
 public enum ExtraCommands
 {
+	//rock,rubble
 	FindUnTargeted,
 	Nothing,
 	ReturnCrystal,
 	ReturnOre,
+	//collectable
 	FindUnTargetedObjects,
+	//used for construction
 	R_Ore_Crystal,
+	//used for construction
+	PlaceStops,
 }
 
 
@@ -170,13 +176,26 @@ public class Lego_Character : MonoBehaviour
 			//place collectable at base
 			if (CurrentTask == CurrentJob.DropOffCollectable || CurrentTask == CurrentJob.ConstructionWorker)
 			{
-				if(TaskObject != null)
-				{
-					var distance = Vector3.Distance(transform.position, TaskObject.transform.position);
+				var distance = Vector3.Distance(transform.position, TaskObject.transform.position);
 
-					if (distance <= 2)
+
+				//ore and crystal drop off
+				if (distance <= 2 && ItemType != CollectableType.Stops)
+				{
+					PutCollectableDownAtBase();
+				}
+
+				//stops drop off
+				if (ItemType == CollectableType.Stops )
+				{
+					var index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
+					var StopPoint = TaskObject.GetComponent<Construction_Script>().RequiredStopsList[index];
+					var distanceToStop = Vector3.Distance(transform.position, StopPoint.transform.position);
+					this.GetComponent<NavMeshAgent>().SetDestination(StopPoint.transform.position);
+
+					if (distanceToStop <= 1)
 					{
-						PutCollectableDownAtBase();
+						placeStopDown();
 					}
 				}
 			}
@@ -238,6 +257,13 @@ public class Lego_Character : MonoBehaviour
 			var shortestPath = this.ShortestPath(System_Script.ConstructionSites, ExtraCommands.R_Ore_Crystal);
 			GetComponent<NavMeshAgent>().SetPath(shortestPath);
 
+			if(ItemType == CollectableType.Stops)
+			{
+				var index = shortestPath.Object.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
+				var point = shortestPath.Object.GetComponent<Construction_Script>().RequiredStopsList[index];
+				GetComponent<NavMeshAgent>().SetDestination(point.transform.position);
+			}
+
 			if(shortestPath.Length != float.MaxValue)
 			{
 				set = true;
@@ -255,8 +281,8 @@ public class Lego_Character : MonoBehaviour
 				set = true;
 				CurrentTask = CurrentJob.DropOffCollectable;
 			}
-
 		}
+
 
 		if (ItemType == CollectableType.Ore && !set)
 		{
@@ -276,9 +302,9 @@ public class Lego_Character : MonoBehaviour
 	//put crystal away
 	public void PutCollectableDownAtBase()
 	{
-
 		if(CurrentTask != CurrentJob.ConstructionWorker)
 		{
+			// used for collection of resources
 			if (Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Crystal)
 			{
 				SystemSrpt.CrystalsCollectedCart++;
@@ -293,6 +319,7 @@ public class Lego_Character : MonoBehaviour
 		}
 		else
 		{
+			// used for building
 			if (Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Ore)
 			{
 				TaskObject.GetComponent<Construction_Script>().Contained_Ore++;
@@ -303,7 +330,25 @@ public class Lego_Character : MonoBehaviour
 				TaskObject.GetComponent<Construction_Script>().Contained_Crystal++;
 			}
 		}
-		
+
+		Destroy(Items[0]);
+		Items.Clear();
+
+		CurrentTask = CurrentJob.Nothing;
+		TaskChassis = TaskChassis.Nothing;
+	}
+
+	public void placeStopDown()
+	{
+		if (Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Stops)
+		{
+			//var parent = TaskObject.transform.parent;
+			TaskObject.GetComponent<Construction_Script>().Contained_Stops++;
+
+			System_Script.CollectableStops.Remove(Items[0]);
+			var index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
+			TaskObject.GetComponent<Construction_Script>().RequiredStopsList.RemoveAt(index);
+		}
 
 		Destroy(Items[0]);
 		Items.Clear();
@@ -371,6 +416,23 @@ public class Lego_Character : MonoBehaviour
 			{
 				FindAndClearRubble();
 			}
+
+			if (System_Script.CollectableStops.Count > 0)
+			{
+				TaskChassis = TaskChassis.GatherStops;
+				FindAndCollectStops();
+			}
+		}
+	}
+
+	public void FindAndCollectStops()
+	{
+		var shortestPath = this.ShortestPath(System_Script.CollectableStops, ExtraCommands.FindUnTargeted);
+
+		if (shortestPath.Length != float.MaxValue)
+		{
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+			StartCollecting();
 		}
 	}
 

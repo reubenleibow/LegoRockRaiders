@@ -262,10 +262,6 @@ public class Game_Script : MonoBehaviour
 
 		//if (X == 11 && Y == 8)
 		//{
-		Debug.Log(RockGridNumbers[11, 7].RockShape);
-		Debug.Log(RockGridNumbers[11, 9].RockShape);
-		Debug.Log(RockGridNumbers[12, 8].RockShape);
-		Debug.Log(RockGridNumbers[10, 8].RockShape);
 
 
 		//}

@@ -12,8 +12,11 @@ public partial class System_Script : MonoBehaviour
 	public static List<GameObject> ListOfAllToolStores = new List<GameObject>();
 	public static List<GameObject> ListOfAllPowerStations = new List<GameObject>();
 	public static List<GameObject> AllBuildings = new List<GameObject>();
+
 	public static List<GameObject> AllCrystals = new List<GameObject>();
 	public static List<GameObject> AllOre = new List<GameObject>();
+	public static List<GameObject> AllStops = new List<GameObject>();
+
 	public static List<GameObject> DrillRocks = new List<GameObject>();
 	public static List<GameObject> ClearRubble = new List<GameObject>();
 	public static List<GameObject> ConstructionSites = new List<GameObject>();
@@ -22,6 +25,8 @@ public partial class System_Script : MonoBehaviour
 
 	public static List<GameObject> CollectableOre = new List<GameObject>();
 	public static List<GameObject> CollectableCrystals = new List<GameObject>();
+	public static List<GameObject> CollectableStops = new List<GameObject>();
+
 
 	public List<Image> Images = new List<Image>();
 

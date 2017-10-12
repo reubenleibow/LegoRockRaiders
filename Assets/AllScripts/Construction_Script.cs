@@ -9,7 +9,8 @@ public class Construction_Script : MonoBehaviour {
 	public List<GameObject> Workerlist_Ore = new List<GameObject>();
 	public List<GameObject> Workerlist_Crystal = new List<GameObject>();
 	public List<GameObject> Workerlist_Stops = new List<GameObject>();
-
+	//pre made up of emptygame objects on path
+	public List<GameObject> RequiredStopsList = new List<GameObject>();
 
 	public int Required_Ore = 2;
 	public int Required_Crystal = 0;
@@ -30,7 +31,13 @@ public class Construction_Script : MonoBehaviour {
 	public Building_System Building_System;
 	public GameObject systemObj;
 
+	public GameObject StopPoint1;
+	public GameObject StopPoint2;
+	public GameObject StopPoint3;
+	public GameObject StopPoint4;
+
 	public ConstructionTypes ConstructionType = ConstructionTypes.Nothing;
+	public bool changeInStops = false;
 
 
 	// Use this for initialization
@@ -40,6 +47,13 @@ public class Construction_Script : MonoBehaviour {
 		AllBuildings = systemObj.GetComponent<AllBuildings>();
 		Building_System = systemObj.GetComponent<Building_System>();
 
+		if(ConstructionType == ConstructionTypes.Teleportpad)
+		{
+			RequiredStopsList.Add(StopPoint1);
+			RequiredStopsList.Add(StopPoint2);
+			RequiredStopsList.Add(StopPoint3);
+			RequiredStopsList.Add(StopPoint4);
+		}
 	}
 
 	// Update is called once per frame
@@ -126,6 +140,7 @@ public class Construction_Script : MonoBehaviour {
 			Completed();
 		}
 
+		//if(RequiredStopsList )
 	}
 
 	public void PlaceOre()
@@ -140,15 +155,7 @@ public class Construction_Script : MonoBehaviour {
 			System_Script.ConstructionSites.Remove(this.gameObject);
 		}
 
-		//if(ConstructionType == ConstructionTypes.PowerPath)
-		//{
-			Destroy(this.gameObject);
-		//}
-
-		//if(ConstructionType == ConstructionTypes.ToolStore)
-		//{
-
-		//}
+		Destroy(this.gameObject);
 	}
 
 	public void OnDestroy()
@@ -167,12 +174,16 @@ public class Construction_Script : MonoBehaviour {
 		{
 			var script = systemObj.GetComponent<Building_System>();
 			var script1 = systemObj.GetComponent<StartConstruction>();
-
-			Debug.Log(script1.ExtraPath);
-
 			var building = Instantiate(script.ToolStore, this.transform.position, Quaternion.identity);
 			var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
+		}
 
+		if (CompletedConstruction && ConstructionType == ConstructionTypes.Teleportpad)
+		{
+			var script = systemObj.GetComponent<Building_System>();
+			var script1 = systemObj.GetComponent<StartConstruction>();
+			var building = Instantiate(script.Teleportpad, this.transform.position, Quaternion.identity);
+			var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
 		}
 	}
 }

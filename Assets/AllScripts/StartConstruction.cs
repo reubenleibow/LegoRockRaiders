@@ -12,6 +12,7 @@ public enum ConstructionTypes
 {
 	PowerPath,
 	ToolStore,
+	Teleportpad,
 	Nothing
 }
 
@@ -78,6 +79,15 @@ public class StartConstruction : MonoBehaviour {
 					}
 				}
 
+
+				var StopObj = this.GetComponent<Building_System>().Stops;
+				var Toolstore = this.GetComponent<System_Script>().Toolstore;
+
+				for (int i = 0; i < StoprForProject; i++)
+				{
+					var NewStop = Instantiate(StopObj, Toolstore.transform.position, Quaternion.identity);
+				}
+
 				OnBackClicked();
 			}
 		}
@@ -113,6 +123,14 @@ public class StartConstruction : MonoBehaviour {
 		ConstructionTypes = ConstructionTypes.ToolStore;
 		CreateBuildingSquare(1, 1);
 		SetRequirements(0,0,0);
+	}
+
+	public void On_Click_TeleportPad()
+	{
+		B_Type = BuildingGroundType.one_one;
+		ConstructionTypes = ConstructionTypes.Teleportpad;
+		CreateBuildingSquare(1, 1);
+		SetRequirements(0, 0, 4);
 	}
 
 	public void CreateBuildingSquare(int Green, int Yellow)
