@@ -345,6 +345,7 @@ public class Lego_Character : MonoBehaviour
 				SystemSrpt.OreCollectedCart++;
 				TaskChassis = TaskChassis.GatherOre;
 			}
+			Destroy(Items[0]);
 		}
 		else
 		{
@@ -358,11 +359,13 @@ public class Lego_Character : MonoBehaviour
 			{
 				TaskObject.GetComponent<Construction_Script>().Contained_Crystal++;
 			}
+
+			TaskObject.GetComponent<Construction_Script>().aquiredObj.Add(Items[0]);
+			Items[0].GetComponent<Collectable>().MakeStatic();
 		}
 
-		if(Items.Count > 0)
+		if (Items.Count > 0)
 		{
-			Destroy(Items[0]);
 			Items.Clear();
 
 			CurrentTask = CurrentJob.Nothing;
@@ -380,16 +383,17 @@ public class Lego_Character : MonoBehaviour
 			System_Script.CollectableStops.Remove(Items[0]);
 			var index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
 			TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints.RemoveAt(index);
+
+			TaskObject.GetComponent<Construction_Script>().aquiredObj.Add(Items[0]);
+			Items[0].GetComponent<Collectable>().MakeStatic();
 		}
 
-		Destroy(Items[0]);
+		//Destroy(Items[0]);
 		Items.Clear();
 
 		CurrentTask = CurrentJob.Nothing;
 		TaskChassis = TaskChassis.Nothing;
 		ItemType = CollectableType.Nothing;
-		//ItemType = I.Nothing;
-
 	}
 
 	public void ArrivedAtDest()

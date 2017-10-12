@@ -32,7 +32,6 @@ public class StartConstruction : MonoBehaviour {
 	public int CrystalsForProject = 0;
 	public int StoprForProject = 0;
 
-
 	// Use this for initialization
 	void Start () {
 		
@@ -43,7 +42,6 @@ public class StartConstruction : MonoBehaviour {
 	{
 		RaycastHit dest;
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
 
 		if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")))
 		{

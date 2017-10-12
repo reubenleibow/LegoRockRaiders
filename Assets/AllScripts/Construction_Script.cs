@@ -11,6 +11,8 @@ public class Construction_Script : MonoBehaviour {
 	public List<GameObject> Workerlist_Stops = new List<GameObject>();
 	//pre made up of emptygame objects on path
 	public List<GameObject> RequiredStopsListPoints = new List<GameObject>();
+	public List<GameObject> aquiredObj = new List<GameObject>();
+
 
 	public int Required_Ore = 2;
 	public int Required_Crystal = 0;
@@ -153,6 +155,11 @@ public class Construction_Script : MonoBehaviour {
 		if (System_Script.ConstructionSites.Contains(this.gameObject))
 		{
 			System_Script.ConstructionSites.Remove(this.gameObject);
+		}
+
+		foreach (var item in aquiredObj.ToArray())
+		{
+			Destroy(item);
 		}
 
 		Destroy(this.gameObject);
