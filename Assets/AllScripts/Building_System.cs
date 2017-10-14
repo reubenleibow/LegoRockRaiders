@@ -67,6 +67,12 @@ public class Building_System : MonoBehaviour {
 
 		RaycastHit dest;
 		var cancel = false;
+		var overUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+
+		if (overUI)
+		{
+			cancel = true;
+		}
 
 		if (Input.GetMouseButtonDown(0))
 		{
@@ -80,6 +86,7 @@ public class Building_System : MonoBehaviour {
 				}
 			}
 
+
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			var OnterrainClick = false;
 
@@ -87,6 +94,7 @@ public class Building_System : MonoBehaviour {
 			//{
 				if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")) && !cancel)
 				{
+				Debug.Log(dest.collider);
 					var P = dest.point;
 					var X_ = (Mathf.Round(P.x / SelectorSize)) * SelectorSize;
 					var Z_ = (Mathf.Round(P.z / SelectorSize)) * SelectorSize;
