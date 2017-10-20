@@ -48,6 +48,8 @@ public class StartConstruction : MonoBehaviour {
     public int OreForProject = 0;
 	public int CrystalsForProject = 0;
 	public int StoprForProject = 0;
+    public Vector3 BuildingAngle = Vector3.zero;
+
 
     public int MousePosX = 0;
     public int MousePosZ = 0;
@@ -85,7 +87,6 @@ public class StartConstruction : MonoBehaviour {
 					if (name == "G")
 					{
                         var newPath = Instantiate(ExtraPath, square.Square.transform.position, Quaternion.identity);
-
                     }
 
                     if (name == "Y")
@@ -94,13 +95,13 @@ public class StartConstruction : MonoBehaviour {
                         Construction = newPath.GetComponent<Construction_Script>();
 
                         Construction.ConstructionType = ConstructionTypes;
+                        Construction.Angle = BuildingAngle;
 
                         Construction.Required_Ore = OreForProject;
                         Construction.Required_Crystal = CrystalsForProject;
                         Construction.Required_Stops = StoprForProject;
                     }
 				}
-
 
 				var StopObj = this.GetComponent<Building_System>().Stops;
 				var Toolstore = this.GetComponent<System_Script>().Toolstore;
@@ -132,21 +133,25 @@ public class StartConstruction : MonoBehaviour {
             if (MousePosZ > (int)MouseZ && ConstructionAngle != ConstructionAngle.Down)
             {
                 ConstructionAngle = ConstructionAngle.Down;
+                BuildingAngle = new Vector3(0, 90, 0);
             }
 
             if (MousePosZ < (int)MouseZ && ConstructionAngle != ConstructionAngle.Up)
             {
                 ConstructionAngle = ConstructionAngle.Up;
+                BuildingAngle = new Vector3(0, 270, 0);
             }
 
             if (MousePosX > (int)MouseX && ConstructionAngle != ConstructionAngle.Right)
             {
                 ConstructionAngle = ConstructionAngle.Right;
+                BuildingAngle = new Vector3(0, 180, 0);
             }
 
             if (MousePosX < (int)MouseX && ConstructionAngle != ConstructionAngle.Left)
             {
                 ConstructionAngle = ConstructionAngle.Left;
+                BuildingAngle = new Vector3(0, 0, 0);
             }
         }
 

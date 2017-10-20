@@ -18,11 +18,11 @@ public class Construction_Script : MonoBehaviour {
 	public int Required_Crystal = 0;
 	public int Required_Stops = 0;
 
-
 	public bool Ore_Worker = false;
 	public bool Crystal_Worker = false;
 	public bool Stops_Worker = false;
 	public bool CompletedConstruction = false;
+    public Vector3 Angle = Vector3.zero;
 
 
 	public int Contained_Ore = 0;
@@ -39,7 +39,7 @@ public class Construction_Script : MonoBehaviour {
 	public GameObject StopPoint4;
 
 	public ConstructionTypes ConstructionType = ConstructionTypes.Nothing;
-	public bool changeInStops = false;
+    public bool changeInStops = false;
 
 
 	// Use this for initialization
@@ -141,8 +141,6 @@ public class Construction_Script : MonoBehaviour {
 			CompletedConstruction = true;
 			Completed();
 		}
-
-		//if(RequiredStopsListPoints )
 	}
 
 	public void PlaceOre()
@@ -150,7 +148,7 @@ public class Construction_Script : MonoBehaviour {
 
 	}
 
-	public void Completed()
+	public void Completed()//look for function OnDestroy for more info
 	{
 		if (System_Script.ConstructionSites.Contains(this.gameObject))
 		{
@@ -182,6 +180,7 @@ public class Construction_Script : MonoBehaviour {
 			var script = systemObj.GetComponent<Building_System>();
 			var script1 = systemObj.GetComponent<StartConstruction>();
 			var building = Instantiate(script.ToolStore, this.transform.position, Quaternion.identity);
+            building.transform.eulerAngles = Angle;
 			var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
 		}
 
@@ -190,7 +189,9 @@ public class Construction_Script : MonoBehaviour {
 			var script = systemObj.GetComponent<Building_System>();
 			var script1 = systemObj.GetComponent<StartConstruction>();
 			var building = Instantiate(script.Teleportpad, this.transform.position, Quaternion.identity);
-			var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
+            building.transform.eulerAngles = Angle;
+
+            var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
 		}
 	}
 }
