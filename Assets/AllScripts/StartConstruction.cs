@@ -16,9 +16,24 @@ public enum ConstructionTypes
 	Nothing
 }
 
+public enum ConstructionAngle
+{
+    Left,
+    Right,
+    Up,
+    Down,
+    Nothing
+}
+public class ConstructionSquare
+{
+    public GameObject Square;
+    public int X = 0;
+    public int Z = 0;
+}
+
 public class StartConstruction : MonoBehaviour {
 
-	public List<GameObject> BuildingSquareList = new List<GameObject>();
+	public List<ConstructionSquare> BuildingSquareList = new List<ConstructionSquare>();
 	public GameObject BuildingSquare_Y;
 	public GameObject BuildingSquare_G;
 	public GameObject ExtraPath;
@@ -27,13 +42,19 @@ public class StartConstruction : MonoBehaviour {
 
 	public BuildingGroundType B_Type = BuildingGroundType.blank;
 	public ConstructionTypes ConstructionTypes = ConstructionTypes.Nothing;
+    public ConstructionAngle ConstructionAngle = ConstructionAngle.Nothing;
 
-	public int OreForProject = 0;
+
+    public int OreForProject = 0;
 	public int CrystalsForProject = 0;
 	public int StoprForProject = 0;
 
-	// Use this for initialization
-	void Start () {
+    public int MousePosX = 0;
+    public int MousePosZ = 0;
+
+
+    // Use this for initialization
+    void Start () {
 		
 	}
 	
@@ -59,24 +80,25 @@ public class StartConstruction : MonoBehaviour {
 			{
 				foreach (var square in BuildingSquareList.ToArray())
 				{
-					var name = square.transform.name;
+					var name = square.Square.transform.name;
 
 					if (name == "G")
 					{
-						var newPath = Instantiate(ExtraPath, square.transform.position, Quaternion.identity);
-					}
+                        var newPath = Instantiate(ExtraPath, square.Square.transform.position, Quaternion.identity);
 
-					if (name == "Y")
-					{
-						var newPath = Instantiate(BasePath, square.transform.position, Quaternion.identity);
-						Construction = newPath.GetComponent<Construction_Script>();
+                    }
 
-						Construction.ConstructionType = ConstructionTypes;
+                    if (name == "Y")
+                    {
+                        var newPath = Instantiate(BasePath, square.Square.transform.position, Quaternion.identity);
+                        Construction = newPath.GetComponent<Construction_Script>();
 
-						Construction.Required_Ore = OreForProject;
-						Construction.Required_Crystal = CrystalsForProject;
-						Construction.Required_Stops = StoprForProject;
-					}
+                        Construction.ConstructionType = ConstructionTypes;
+
+                        Construction.Required_Ore = OreForProject;
+                        Construction.Required_Crystal = CrystalsForProject;
+                        Construction.Required_Stops = StoprForProject;
+                    }
 				}
 
 
@@ -98,56 +120,115 @@ public class StartConstruction : MonoBehaviour {
 		var MouseX = (Mathf.Round(Pos.x / 12)) * 12;
 		var MouseZ = (Mathf.Round(Pos.z / 12)) * 12;
 
-		if (B_Type == BuildingGroundType.one_one)
-		{
-			foreach(var square in BuildingSquareList.ToArray())
-			{
-				var name = square.transform.name;
 
-				if(name == "G")
-				{
-					square.transform.position = new Vector3(MouseX, 0.1f, MouseZ + 12);
-				}
+        if (MousePosX == 0 &&  MousePosZ == 0)
+        {
+            MousePosX = (int)MouseX;
+            MousePosZ = (int)MouseZ;
+        }
 
-				if (name == "Y")
-				{
-					square.transform.position = new Vector3(MouseX, 0.1f, MouseZ );
-				}
-			}
-		}
+        if (MousePosX != (int)MouseX || MousePosZ != (int)MouseZ)
+        {
+            if (MousePosZ > (int)MouseZ && ConstructionAngle != ConstructionAngle.Down)
+            {
+                ConstructionAngle = ConstructionAngle.Down;
+            }
+
+            if (MousePosZ < (int)MouseZ && ConstructionAngle != ConstructionAngle.Up)
+            {
+                ConstructionAngle = ConstructionAngle.Up;
+            }
+
+            if (MousePosX > (int)MouseX && ConstructionAngle != ConstructionAngle.Right)
+            {
+                ConstructionAngle = ConstructionAngle.Right;
+            }
+
+            if (MousePosX < (int)MouseX && ConstructionAngle != ConstructionAngle.Left)
+            {
+                ConstructionAngle = ConstructionAngle.Left;
+            }
+        }
+
+        foreach (var item in BuildingSquareList.ToArray())
+        {
+            var X_ = item.X;
+            var Z_ = item.Z;
+            var XNew = item.X;
+            var ZNew = item.Z;
+
+            if (ConstructionAngle == ConstructionAngle.Up)
+            {
+            }
+
+            if (ConstructionAngle == ConstructionAngle.Down)
+            {
+                XNew = item.X * -1;
+                ZNew = item.Z * -1;
+            }
+
+            if (ConstructionAngle == ConstructionAngle.Left)
+            {
+                XNew = item.Z;
+                ZNew = item.X;
+            }
+
+            if (ConstructionAngle == ConstructionAngle.Right)
+            {
+                XNew = item.Z * -1;
+                ZNew = item.X * -1;
+            }
+
+            item.Square.transform.position = new Vector3(MouseX + (XNew * 12), 0.1f, MouseZ + (ZNew * 12));
+        }
+
+        MousePosX = (int)MouseX;
+        MousePosZ = (int)MouseZ;
 	}
 
 	public void On_Click_ToolStore()
 	{
 		B_Type = BuildingGroundType.one_one;
 		ConstructionTypes = ConstructionTypes.ToolStore;
-		CreateBuildingSquare(1, 1);
 		SetRequirements(0,0,0);
-	}
+		CreateBuildingSquare(0, 0,0);
+        CreateBuildingSquare(0, -1,1);
+    }
 
-	public void On_Click_TeleportPad()
+    public void On_Click_TeleportPad()
 	{
 		B_Type = BuildingGroundType.one_one;
 		ConstructionTypes = ConstructionTypes.Teleportpad;
-		CreateBuildingSquare(1, 1);
 		SetRequirements(8, 0, 4);
-	}
+        CreateBuildingSquare(0, 0, 0);
+        CreateBuildingSquare(0, -1, 1);
+    }
 
-	public void CreateBuildingSquare(int Green, int Yellow)
+    public void CreateBuildingSquare(int X, int Z, int Type)
 	{
-		for (int i = 0; i < Green; i++)
-		{
-			var GreenS = Instantiate(BuildingSquare_G, new Vector3(0, 0, 0), Quaternion.identity);
-			GreenS.transform.name = "G";
-			BuildingSquareList.Add(GreenS);
-		}
+        if(Type == 0)
+        {
+            var New = new ConstructionSquare();
+            var YellowS = Instantiate(BuildingSquare_Y, new Vector3(0, 0, 0), Quaternion.identity);
+            YellowS.transform.name = "Y";
 
-		for (int i = 0; i < Yellow; i++)
-		{
-			var YellowS = Instantiate(BuildingSquare_Y, new Vector3(0, 0, 0), Quaternion.identity);
-			YellowS.transform.name = "Y";
-			BuildingSquareList.Add(YellowS);
-		}
+            New.Square = YellowS;
+            New.X = X;
+            New.Z = Z;
+            BuildingSquareList.Add(New);
+        }
+
+        if (Type == 1)
+        {
+            var New = new ConstructionSquare();
+            var GreenS = Instantiate(BuildingSquare_G, new Vector3(0, 0, 0), Quaternion.identity);
+            GreenS.transform.name = "G";
+
+            New.Square = GreenS;
+            New.X = X;
+            New.Z = Z;
+            BuildingSquareList.Add(New);
+        }
 	}
 
 	public void OnBackClicked()
@@ -157,7 +238,7 @@ public class StartConstruction : MonoBehaviour {
 			foreach(var i in BuildingSquareList.ToArray())
 			{
 				BuildingSquareList.Remove(i);
-				Destroy(i);
+				Destroy(i.Square);
 			}
 		}
 
