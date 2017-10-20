@@ -12,9 +12,10 @@ public class Construction_Script : MonoBehaviour {
 	//pre made up of emptygame objects on path
 	public List<GameObject> RequiredStopsListPoints = new List<GameObject>();
 	public List<GameObject> aquiredObj = new List<GameObject>();
+    public List<GameObject> ExtraPaths = new List<GameObject>();
 
 
-	public int Required_Ore = 2;
+    public int Required_Ore = 2;
 	public int Required_Crystal = 0;
 	public int Required_Stops = 0;
 
@@ -161,6 +162,8 @@ public class Construction_Script : MonoBehaviour {
 		}
 
 		Destroy(this.gameObject);
+
+		// ToDo: Set building property on the extra paths once the builsing is complete, and set to CompleteBuilding
 	}
 
 	public void OnDestroy()

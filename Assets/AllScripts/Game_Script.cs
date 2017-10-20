@@ -384,7 +384,7 @@ public class Game_Script : MonoBehaviour
 	/// <summary>
 	/// Destroy a rock in the world and then update adjacent rocks
 	/// </summary>
-	private void EraseRock(int X, int Y)
+	public void EraseRock(int X, int Y)
 	{
 		if (X >= 0 && X < Rows && Y >= 0 && Y < Columns)
 		{

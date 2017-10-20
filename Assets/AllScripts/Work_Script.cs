@@ -20,9 +20,9 @@ public class Work_Script : MonoBehaviour {
 	private System_Script System_St;
 	public GridPos RockProperties;
 	public Building_System Building_System;
+	public Game_Script Game_Script;
 
-
-	public int OreCreated = 0;
+    public int OreCreated = 0;
 
 	private int SpreadX = 5;
 	private int SpreadY = 5;
@@ -39,7 +39,8 @@ public class Work_Script : MonoBehaviour {
 	{
 		System_ = GameObject.Find("System");
 		System_St = System_.GetComponent<System_Script>();
-		Building_System = System_.GetComponent<Building_System>();
+        Game_Script = System_.GetComponent<Game_Script>();
+        Building_System = System_.GetComponent<Building_System>();
 	}
 
 	// Update is called once per frame
@@ -71,7 +72,12 @@ public class Work_Script : MonoBehaviour {
 
 		if(Health <= 0)
 		{
-			Destroy(this.gameObject);
+            if (Type == ObjectType.Rock)
+            {
+                Game_Script.EraseRock(X,Y);
+            }
+
+            Destroy(this.gameObject);
 		}
 
 		if(Type == ObjectType.Rubble)

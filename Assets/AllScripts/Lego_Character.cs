@@ -382,11 +382,14 @@ public class Lego_Character : MonoBehaviour
 
 			System_Script.CollectableStops.Remove(Items[0]);
 			var index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
-			TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints.RemoveAt(index);
+            Items[0].transform.rotation = TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints[index].transform.rotation;
+            TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints.RemoveAt(index);
 
 			TaskObject.GetComponent<Construction_Script>().aquiredObj.Add(Items[0]);
 			Items[0].GetComponent<Collectable>().MakeStatic();
-		}
+            Items[0].GetComponent<Animation>().Play("Open");
+
+        }
 
 		//Destroy(Items[0]);
 		Items.Clear();

@@ -9,6 +9,9 @@ public enum BuildingTypes
 	PowerPathComplete,
 	Rubble,
 	Rock,
+    Building,
+	CompleteBuilding,
+
 
 }
 public class TerainAdditions
@@ -155,14 +158,18 @@ public class Building_System : MonoBehaviour {
 			System_Script.CurrentMenuBarNumber = 5;
 		}
 
-		if (CurrentBuildingType == BuildingTypes.PowerPathBegin)
-		{
-			System_Script.CurrentMenuBarNumber = 6;
-		}
+        if (CurrentBuildingType == BuildingTypes.PowerPathBegin)
+        {
+            System_Script.CurrentMenuBarNumber = 6;
+        }
 
-	}
+        if (CurrentBuildingType == BuildingTypes.Building)
+        {
+            System_Script.CurrentMenuBarNumber = 6;
+        }
+    }
 
-	public void UpdateIcons()
+    public void UpdateIcons()
 	{
 		if (CurrentBuildingType == BuildingTypes.Rubble && CurrentObject != null)
 		{
@@ -186,7 +193,6 @@ public class Building_System : MonoBehaviour {
 		BuildingGrid[Clicked_X, Clicked_Z].B_Types = BuildingTypes.PowerPathBegin;
 
 		System_Script.CurrentMenuBarNumber = 1;
-
 	}
 
 	public void On_Click_CancelBuilding()
@@ -196,22 +202,35 @@ public class Building_System : MonoBehaviour {
 		var X_ = Object_.transform.position.x;
 		var Z_ = Object_.transform.position.z;
 
+        if(ObectScript.ExtraPaths.Count > 0)
+        {
+            foreach (var item in ObectScript.ExtraPaths)
+            {
+				var Pos = item.transform.position;
+				var PosX = (int)Pos.x;
+				var PosZ = (int)Pos.z;
 
-		if (ObectScript.Contained_Crystal > 0)
-		{
-			for (int i = 0; i < ObectScript.Contained_Crystal; i++)
-			{
-				//var newCrystal = Instantiate(System_Script.cry, new Vector3(X_ + Random.Range(-2,2) , 0.1f , Z_ + Random.Range(-2, 2)), Quaternion.identity);
-			}
-		}
+				BuildingGrid[PosX / 12, PosZ/12].Object = null;
+				BuildingGrid[PosX / 12, PosZ / 12].B_Types = BuildingTypes.Nothing;
+				Destroy(item);
+            }
+        }
 
-		if (ObectScript.Contained_Ore > 0)
-		{
-			for (int i = 0; i < ObectScript.Contained_Ore; i++)
-			{
-				var newCrystal = Instantiate(System_Script.Ore, new Vector3(X_ + Random.Range(-2, 2), 0.1f, Z_ + Random.Range(-2, 2)), Quaternion.identity);
-			}
-		}
+		//if (ObectScript.Contained_Crystal > 0)
+		//{
+		//	for (int i = 0; i < ObectScript.Contained_Crystal; i++)
+		//	{
+		//		//var newCrystal = Instantiate(System_Script.cry, new Vector3(X_ + Random.Range(-2,2) , 0.1f , Z_ + Random.Range(-2, 2)), Quaternion.identity);
+		//	}
+		//}
+
+		//if (ObectScript.Contained_Ore > 0)
+		//{
+		//	for (int i = 0; i < ObectScript.Contained_Ore; i++)
+		//	{
+		//		var newCrystal = Instantiate(System_Script.Ore, new Vector3(X_ + Random.Range(-2, 2), 0.1f, Z_ + Random.Range(-2, 2)), Quaternion.identity);
+		//	}
+		//}
 
 		RemoveFromList(Object_);
 
