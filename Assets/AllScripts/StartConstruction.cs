@@ -14,7 +14,7 @@ public enum ConstructionTypes
 	ToolStore,
 	Teleportpad,
 	Nothing,
-	Building
+	Building,
 }
 
 public enum ConstructionAngle
@@ -138,6 +138,10 @@ public class StartConstruction : MonoBehaviour
 					{
 						Building_System.BuildingGrid[PosX, PosZ].Object.GetComponent<Construction_Script>().ExtraPaths.Add(CurrentNewBuilding);
 					}
+					else
+					{
+						Building_System.BuildingGrid[PosX, PosZ].Object.GetComponent<Construction_Script>().ExtraPaths.Add(CurrentNewBuilding);
+					}
 					//Building_System.BuildingGrid[PosX, PosZ].Object.GetComponent<Construction_Script>().ExtraPaths = new List<ConstructionSquare>(BuildingSquareList);
 
 				}
@@ -234,7 +238,7 @@ public class StartConstruction : MonoBehaviour
 	{
 		B_Type = BuildingGroundType.one_one;
 		ConstructionTypes = ConstructionTypes.ToolStore;
-		SetRequirements(0, 0, 0);
+		SetRequirements(1, 0, 0);
 		CreateBuildingSquare(0, 0, 0);
 		CreateBuildingSquare(0, -1, 1);
 	}

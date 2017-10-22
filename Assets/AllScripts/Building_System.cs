@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public enum BuildingTypes
 {
@@ -11,7 +9,7 @@ public enum BuildingTypes
 	Rock,
     Building,
 	CompleteBuilding,
-
+	PlaceHolder
 
 }
 public class TerainAdditions
@@ -93,8 +91,6 @@ public class Building_System : MonoBehaviour {
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			var OnterrainClick = false;
 
-			//if (System_Script.selectedGameObject == null)
-			//{
 				if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")) && !cancel)
 				{
 				Debug.Log(dest.collider);
@@ -119,7 +115,6 @@ public class Building_System : MonoBehaviour {
 						On_Click();
 					}
 				}
-			//}
 
 			if (System_Script.selectedGameObject == null && System_Script.SelectedGameObjects.Count == 0 && OnterrainClick)
 			{
@@ -167,7 +162,12 @@ public class Building_System : MonoBehaviour {
         {
             System_Script.CurrentMenuBarNumber = 6;
         }
-    }
+
+		if (CurrentBuildingType == BuildingTypes.PlaceHolder)
+		{
+			System_Script.CurrentMenuBarNumber = 1;
+		}
+	}
 
     public void UpdateIcons()
 	{

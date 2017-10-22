@@ -32,6 +32,7 @@ public class Construction_Script : MonoBehaviour {
 
 	public AllBuildings AllBuildings;
 	public Building_System Building_System;
+	public Game_Script GameScript;
 	public GameObject systemObj;
 
 	public GameObject StopPoint1;
@@ -49,8 +50,10 @@ public class Construction_Script : MonoBehaviour {
 		systemObj = GameObject.Find("System");
 		AllBuildings = systemObj.GetComponent<AllBuildings>();
 		Building_System = systemObj.GetComponent<Building_System>();
+		GameScript = systemObj.GetComponent<Game_Script>();
 
-		if(ConstructionType == ConstructionTypes.Teleportpad)
+
+		if (ConstructionType == ConstructionTypes.Teleportpad)
 		{
 			RequiredStopsListPoints.Add(StopPoint1);
 			RequiredStopsListPoints.Add(StopPoint2);
@@ -161,9 +164,31 @@ public class Construction_Script : MonoBehaviour {
 			Destroy(item);
 		}
 
-		Destroy(this.gameObject);
 
-		// ToDo: Set building property on the extra paths once the builsing is complete, and set to CompleteBuilding
+		foreach (var item in ExtraPaths)
+		{
+			if (item.transform.tag == "ExtraPath")
+			{
+				var Pos = item.transform.position;
+				var X = (int)Pos.x/12;
+				var Z = (int)Pos.z/12;
+
+				Building_System.BuildingGrid[X, Z].B_Types = BuildingTypes.PlaceHolder;
+				Building_System.BuildingGrid[X, Z].Object = null;
+			}
+
+			if (item.transform.tag == "ConstructionPath")
+			{
+				var Pos = item.transform.position;
+				var X = (int)Pos.x / 12;
+				var Z = (int)Pos.z / 12;
+
+				Building_System.BuildingGrid[X, Z].B_Types = BuildingTypes.CompleteBuilding;
+				Building_System.BuildingGrid[X, Z].Object = null;
+			}
+
+		}
+		Destroy(this.gameObject);
 	}
 
 	public void OnDestroy()
@@ -185,6 +210,8 @@ public class Construction_Script : MonoBehaviour {
 			var building = Instantiate(script.ToolStore, this.transform.position, Quaternion.identity);
             building.transform.eulerAngles = Angle;
 			var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
+			path.transform.tag = "ConstructionPath";
+
 		}
 
 		if (CompletedConstruction && ConstructionType == ConstructionTypes.Teleportpad)
@@ -195,6 +222,7 @@ public class Construction_Script : MonoBehaviour {
             building.transform.eulerAngles = Angle;
 
             var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
+			path.transform.tag = "ConstructionPath";
 		}
 	}
 }
