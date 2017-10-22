@@ -9,11 +9,12 @@ public class Construction_Script : MonoBehaviour {
 	public List<GameObject> Workerlist_Ore = new List<GameObject>();
 	public List<GameObject> Workerlist_Crystal = new List<GameObject>();
 	public List<GameObject> Workerlist_Stops = new List<GameObject>();
-	//pre made up of emptygame objects on path
+
+	//pre made up of emptygame objects on path(Stops only)
 	public List<GameObject> RequiredStopsListPoints = new List<GameObject>();
+
 	public List<GameObject> aquiredObj = new List<GameObject>();
     public List<GameObject> ExtraPaths = new List<GameObject>();
-
 
     public int Required_Ore = 2;
 	public int Required_Crystal = 0;
@@ -23,6 +24,7 @@ public class Construction_Script : MonoBehaviour {
 	public bool Crystal_Worker = false;
 	public bool Stops_Worker = false;
 	public bool CompletedConstruction = false;
+	public bool Fake = false;
     public Vector3 Angle = Vector3.zero;
 
 
@@ -53,13 +55,16 @@ public class Construction_Script : MonoBehaviour {
 		GameScript = systemObj.GetComponent<Game_Script>();
 
 
-		if (ConstructionType == ConstructionTypes.Teleportpad)
-		{
-			RequiredStopsListPoints.Add(StopPoint1);
-			RequiredStopsListPoints.Add(StopPoint2);
-			RequiredStopsListPoints.Add(StopPoint3);
-			RequiredStopsListPoints.Add(StopPoint4);
-		}
+		//if (ConstructionType == ConstructionTypes.Teleportpad)
+		//{
+		//	RequiredStopsListPoints.Add(StopPoint1);
+		//	RequiredStopsListPoints.Add(StopPoint2);
+		//	RequiredStopsListPoints.Add(StopPoint3);
+		//	RequiredStopsListPoints.Add(StopPoint4);
+		//}
+		//
+		//Debug.Log(RequiredStopsListPoints.Count);
+
 	}
 
 	// Update is called once per frame
@@ -143,7 +148,11 @@ public class Construction_Script : MonoBehaviour {
 		if (Required_Ore <= Contained_Ore  && Required_Crystal <= Contained_Crystal && Required_Stops <= Contained_Stops)
 		{
 			CompletedConstruction = true;
-			Completed();
+
+			if (!Fake)
+			{
+				Completed();
+			}
 		}
 	}
 
@@ -163,7 +172,6 @@ public class Construction_Script : MonoBehaviour {
 		{
 			Destroy(item);
 		}
-
 
 		foreach (var item in ExtraPaths)
 		{
@@ -186,43 +194,46 @@ public class Construction_Script : MonoBehaviour {
 				Building_System.BuildingGrid[X, Z].B_Types = BuildingTypes.CompleteBuilding;
 				Building_System.BuildingGrid[X, Z].Object = null;
 			}
-
 		}
+
 		Destroy(this.gameObject);
 	}
 
 	public void OnDestroy()
 	{
-		if(CompletedConstruction && ConstructionType == ConstructionTypes.PowerPath)
+		if(!Fake)
 		{
-			var newPowerpathcomplete = Instantiate(AllBuildings.PowerPathComplete, this.transform.position, Quaternion.identity);
-			var X = Mathf.Round(this.transform.position.x / 12);
-			var Z = Mathf.Round(this.transform.position.z / 12);
+			if(CompletedConstruction && ConstructionType == ConstructionTypes.PowerPath)
+			{
+				var newPowerpathcomplete = Instantiate(AllBuildings.PowerPathComplete, this.transform.position, Quaternion.identity);
+				var X = Mathf.Round(this.transform.position.x / 12);
+				var Z = Mathf.Round(this.transform.position.z / 12);
 
-			Building_System.BuildingGrid[(int)X, (int)Z].Object = newPowerpathcomplete;
-			Building_System.BuildingGrid[(int)X, (int)Z].B_Types = BuildingTypes.PowerPathComplete;
-		}
+				Building_System.BuildingGrid[(int)X, (int)Z].Object = newPowerpathcomplete;
+				Building_System.BuildingGrid[(int)X, (int)Z].B_Types = BuildingTypes.PowerPathComplete;
+			}
 
-		if (CompletedConstruction && ConstructionType == ConstructionTypes.ToolStore)
-		{
-			var script = systemObj.GetComponent<Building_System>();
-			var script1 = systemObj.GetComponent<StartConstruction>();
-			var building = Instantiate(script.ToolStore, this.transform.position, Quaternion.identity);
-            building.transform.eulerAngles = Angle;
-			var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
-			path.transform.tag = "ConstructionPath";
+			if (CompletedConstruction && ConstructionType == ConstructionTypes.ToolStore)
+			{
+				var script = systemObj.GetComponent<Building_System>();
+				var script1 = systemObj.GetComponent<StartConstruction>();
+				var building = Instantiate(script.ToolStore, this.transform.position, Quaternion.identity);
+			    building.transform.eulerAngles = Angle;
+				var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
+				path.transform.tag = "ConstructionPath";
 
-		}
+			}
 
-		if (CompletedConstruction && ConstructionType == ConstructionTypes.Teleportpad)
-		{
-			var script = systemObj.GetComponent<Building_System>();
-			var script1 = systemObj.GetComponent<StartConstruction>();
-			var building = Instantiate(script.Teleportpad, this.transform.position, Quaternion.identity);
-            building.transform.eulerAngles = Angle;
+			if (CompletedConstruction && ConstructionType == ConstructionTypes.Teleportpad)
+			{
+				var script = systemObj.GetComponent<Building_System>();
+				var script1 = systemObj.GetComponent<StartConstruction>();
+				var building = Instantiate(script.Teleportpad, this.transform.position, Quaternion.identity);
+			    building.transform.eulerAngles = Angle;
 
-            var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
-			path.transform.tag = "ConstructionPath";
+			    var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
+				path.transform.tag = "ConstructionPath";
+			}
 		}
 	}
 }

@@ -31,11 +31,14 @@ public class ConstructionSquare
 	public int X = 0;
 	public int Z = 0;
 }
-
+/// <summary>
+/// This is at the moment only used for the initiation for building creating
+/// </summary>
 public class StartConstruction : MonoBehaviour
 {
 
 	public List<ConstructionSquare> BuildingSquareList = new List<ConstructionSquare>();
+	public List<GameObject> BuildingStopsList = new List<GameObject>();
 	public GameObject BuildingSquare_Y;
 	public GameObject BuildingSquare_G;
 	public GameObject ExtraPath;
@@ -81,26 +84,25 @@ public class StartConstruction : MonoBehaviour
 			}
 		}
 
+		//at the moment it is only used as a power path creator for plans
 		if (B_Type != BuildingGroundType.blank)
 		{
 			var Construction = new Construction_Script();
 
 			if (Input.GetMouseButtonDown(0))
 			{
-				var NewBuilding = new GameObject();
+				var MainNewBuildSite = new GameObject();
 				var CurrentNewBuilding = new GameObject();
 				var Set = false;
+				BuildingStopsList.Clear();
 
+				//Loops through the BuildingplansSquares to create the powerpaths for buildings
 				foreach (var square in BuildingSquareList.ToArray())
 				{
 					var name = square.Square.transform.name;
 					var Pos = square.Square.transform.position;
 					var PosX = (int)Pos.x / 12;
 					var PosZ = (int)Pos.z / 12;
-					// NewBuilding = BuildingSquareList[0].Square;
-					// Debug.Log(NewBuilding);
-
-
 
 					if (name == "Y")
 					{
@@ -108,57 +110,83 @@ public class StartConstruction : MonoBehaviour
 						Construction = newPath.GetComponent<Construction_Script>();
 						CurrentNewBuilding = newPath;
 
-
 						Construction.ConstructionType = ConstructionTypes;
 						Construction.Angle = BuildingAngle;
 
-						Construction.Required_Ore = OreForProject;
-						Construction.Required_Crystal = CrystalsForProject;
-						Construction.Required_Stops = StoprForProject;
-
 						if (!Set)
 						{
-							NewBuilding = newPath;
+							Construction.Required_Ore = OreForProject;
+							Construction.Required_Crystal = CrystalsForProject;
+							Construction.Required_Stops = StoprForProject;
+
+							MainNewBuildSite = newPath;
+							MainNewBuildSite.transform.name = "TheBase";
 							Set = true;
 						}
+						else
+						{
+							Construction.Fake = true;
+						}
+
+						BuildingStopsList.Add(Construction.StopPoint1);
+						BuildingStopsList.Add(Construction.StopPoint2);
+						BuildingStopsList.Add(Construction.StopPoint3);
+						BuildingStopsList.Add(Construction.StopPoint4);
 					}
 
 					if (name == "G")
 					{
 						var newPath = Instantiate(ExtraPath, square.Square.transform.position, Quaternion.identity);
 						CurrentNewBuilding = newPath;
-
 					}
-
 
 					Building_System.BuildingGrid[PosX, PosZ].B_Types = BuildingTypes.Building;
-					Building_System.BuildingGrid[PosX, PosZ].Object = NewBuilding;
-
-					if(CurrentNewBuilding != NewBuilding)
-					{
-						Building_System.BuildingGrid[PosX, PosZ].Object.GetComponent<Construction_Script>().ExtraPaths.Add(CurrentNewBuilding);
-					}
-					else
-					{
-						Building_System.BuildingGrid[PosX, PosZ].Object.GetComponent<Construction_Script>().ExtraPaths.Add(CurrentNewBuilding);
-					}
-					//Building_System.BuildingGrid[PosX, PosZ].Object.GetComponent<Construction_Script>().ExtraPaths = new List<ConstructionSquare>(BuildingSquareList);
-
+					Building_System.BuildingGrid[PosX, PosZ].Object = MainNewBuildSite;
+					Building_System.BuildingGrid[PosX, PosZ].Object.GetComponent<Construction_Script>().ExtraPaths.Add(CurrentNewBuilding);
 				}
+
+				if(BuildingStopsList.Count > 0)
+				{
+					foreach (var stop1 in BuildingStopsList.ToArray())
+					{
+						var Pos1 = stop1.transform.position;
+						var VectorPos1 = new Vector3(Pos1.x,0, Pos1.z);
+
+						foreach (var stop2 in BuildingStopsList.ToArray())
+						{
+							var Pos2 = stop2.transform.position;
+							var VectorPos2 = new Vector3(Pos2.x, 0, Pos2.z);
+
+							var distance = Vector3.Distance(VectorPos1, VectorPos2);
+
+							if(distance > 0 && distance < 6)
+							{
+								BuildingStopsList.Remove(stop1);
+								BuildingStopsList.Remove(stop2);
+							}
+						}
+					}
+					MainNewBuildSite.GetComponent<Construction_Script>().RequiredStopsListPoints = new List<GameObject>(BuildingStopsList);
+				}
+
+				BuildingStopsList.Clear();
 
 				var StopObj = this.GetComponent<Building_System>().Stops;
 				var Toolstore = this.GetComponent<System_Script>().Toolstore;
 
+				//create the stops
 				for (int i = 0; i < StoprForProject; i++)
 				{
 					var NewStop = Instantiate(StopObj, Toolstore.transform.position, Quaternion.identity);
 				}
 
+				//trigger this as a short cut
 				OnBackClicked();
 			}
 		}
 	}
-
+	
+	//moving the buildingplans around
 	public void MousePositionOnTerrain(Vector3 Pos)
 	{
 		var MouseX = (Mathf.Round(Pos.x / 12)) * 12;
@@ -234,6 +262,7 @@ public class StartConstruction : MonoBehaviour
 		MousePosZ = (int)MouseZ;
 	}
 
+	//Create building item clicked on
 	public void On_Click_ToolStore()
 	{
 		B_Type = BuildingGroundType.one_one;
@@ -243,15 +272,31 @@ public class StartConstruction : MonoBehaviour
 		CreateBuildingSquare(0, -1, 1);
 	}
 
+	//Create building item clicked on
+	//public void On_Click_TeleportPad()
+	//{
+	//	B_Type = BuildingGroundType.one_one;
+	//	ConstructionTypes = ConstructionTypes.Teleportpad;
+	//	SetRequirements(8, 0, 4);
+	//	CreateBuildingSquare(0, 0, 0);
+	//	CreateBuildingSquare(0, -1, 1);
+	//}
+
+	//Create building item clicked on
 	public void On_Click_TeleportPad()
 	{
 		B_Type = BuildingGroundType.one_one;
 		ConstructionTypes = ConstructionTypes.Teleportpad;
-		SetRequirements(8, 0, 4);
+		SetRequirements(8, 0, 6);
 		CreateBuildingSquare(0, 0, 0);
+		CreateBuildingSquare(1, 0, 0);
+
 		CreateBuildingSquare(0, -1, 1);
+		CreateBuildingSquare(1, -1, 1);
+
 	}
 
+	// building plan types
 	public void CreateBuildingSquare(int X, int Z, int Type)
 	{
 		if (Type == 0)
@@ -277,6 +322,8 @@ public class StartConstruction : MonoBehaviour
 			New.Z = Z;
 			BuildingSquareList.Add(New);
 		}
+
+
 	}
 
 	public void OnBackClicked()
