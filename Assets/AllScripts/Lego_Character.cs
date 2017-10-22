@@ -383,7 +383,10 @@ public class Lego_Character : MonoBehaviour
 			System_Script.CollectableStops.Remove(Items[0]);
 			var index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
             Items[0].transform.rotation = TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints[index].transform.rotation;
-            TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints.RemoveAt(index);
+			Items[0].transform.eulerAngles += new Vector3(0,180,0);
+			Items[0].transform.position = new Vector3(Items[0].transform.position.x, 0.1f, Items[0].transform.position.z);
+
+			TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints.RemoveAt(index);
 
 			TaskObject.GetComponent<Construction_Script>().aquiredObj.Add(Items[0]);
 			Items[0].GetComponent<Collectable>().MakeStatic();
