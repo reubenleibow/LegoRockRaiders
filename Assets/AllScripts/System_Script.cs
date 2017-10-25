@@ -12,6 +12,7 @@ public partial class System_Script : MonoBehaviour
 	public static List<GameObject> ListOfAllToolStores = new List<GameObject>();
 	public static List<GameObject> ListOfAllPowerStations = new List<GameObject>();
 	public static List<GameObject> AllBuildings = new List<GameObject>();
+	public static List<GameObject> AllWorkers = new List<GameObject>();
 
 	//actual collectable gameobjects currently in the game being played
 	public static List<GameObject> AllCrystals = new List<GameObject>();
@@ -76,17 +77,10 @@ public partial class System_Script : MonoBehaviour
 
 		Initialise();
 	}
-
+	
 	void Update()
 	{
-		TotalStopsNeeded = 0;
-		foreach (var item in ConstructionSites.ToArray())
-		{
-			var script = item.GetComponent<Construction_Script>();
-			var stopsNo = script.Required_Stops - (script.Contained_Stops + script.Workerlist_Stops.Count );
-
-			TotalStopsNeeded = +stopsNo;
-		}
+		GetTotalStops();
 
 		SelectObjects();
 
@@ -463,6 +457,19 @@ public partial class System_Script : MonoBehaviour
 					Unit_.TaskObject = null;
 				}
 			}
+		}
+	}
+
+	public void GetTotalStops()
+	{
+		TotalStopsNeeded = 0;
+
+		foreach (var item in ConstructionSites.ToArray())
+		{
+			var script = item.GetComponent<Construction_Script>();
+			var stopsNo = script.Required_Stops - (script.Contained_Stops + script.Workerlist_Stops.Count);
+
+			TotalStopsNeeded = +stopsNo;
 		}
 	}
 }

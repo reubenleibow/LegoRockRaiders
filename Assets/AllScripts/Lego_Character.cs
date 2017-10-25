@@ -79,6 +79,7 @@ public class Lego_Character : MonoBehaviour
 	public ExtraCommands ExtraCommands = ExtraCommands.Nothing;
 
 	public CollectableType ItemType;
+	public bool DropOffTaskPointDestroyed = false;
 
 
 	public System_Script SystemSrpt;
@@ -87,12 +88,20 @@ public class Lego_Character : MonoBehaviour
 	{
 		Parent = gameObject;
 		//SelectCode = GetComponent<SelectCode>();
-		//System_Script.RaidersList.Add(this.gameObject);
+		System_Script.AllWorkers.Add(this.gameObject);
 		SystemSrpt = GameObject.Find("System").GetComponent<System_Script>();
 	}
 
 	void Update()
 	{
+		if(DropOffTaskPointDestroyed)
+		{
+			TaskObject = null;
+			Debug.Log("Drop off command" + System_Script.ConstructionSites.Count);
+			FindNearestCollectableDropOff();
+			DropOffTaskPointDestroyed = false;
+		}
+
 		//if the user says that it has an item in hand but it does not the set defalut
 		if(Items.Count == 0 && ItemType != CollectableType.Nothing)
 		{
@@ -394,7 +403,6 @@ public class Lego_Character : MonoBehaviour
 
         }
 
-		//Destroy(Items[0]);
 		Items.Clear();
 
 		CurrentTask = CurrentJob.Nothing;

@@ -170,6 +170,8 @@ public class Collectable : MonoBehaviour {
 			System_Script.AllStops.Add(this.gameObject);
 
 		BecomeStatic = false;
-
+		Collector = null;
+		CollectedCart = null;
+		HostChanged = false;
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public enum BuildingTypes
 {
@@ -44,7 +45,7 @@ public class Building_System : MonoBehaviour {
 	public GameObject Teleportpad;
 	public GameObject Stops;
 
-
+	public List<GameObject> CorrectWorkersList = new List<GameObject>();
 
 	// Use this for initialization
 	void Start ()
@@ -202,6 +203,7 @@ public class Building_System : MonoBehaviour {
 		var X_ = Object_.transform.position.x;
 		var Z_ = Object_.transform.position.z;
 
+
         if(ObectScript.ExtraPaths.Count > 0)
         {
             foreach (var item in ObectScript.ExtraPaths)
@@ -214,25 +216,25 @@ public class Building_System : MonoBehaviour {
 				BuildingGrid[PosX / 12, PosZ / 12].B_Types = BuildingTypes.Nothing;
 				Destroy(item);
             }
+
+			foreach (var item in ObectScript.aquiredObj)
+			{
+				item.GetComponent<Collectable>().MakeUnStatic();
+			}
         }
 
-		//if (ObectScript.Contained_Crystal > 0)
-		//{
-		//	for (int i = 0; i < ObectScript.Contained_Crystal; i++)
-		//	{
-		//		//var newCrystal = Instantiate(System_Script.cry, new Vector3(X_ + Random.Range(-2,2) , 0.1f , Z_ + Random.Range(-2, 2)), Quaternion.identity);
-		//	}
-		//}
-
-		//if (ObectScript.Contained_Ore > 0)
-		//{
-		//	for (int i = 0; i < ObectScript.Contained_Ore; i++)
-		//	{
-		//		var newCrystal = Instantiate(System_Script.Ore, new Vector3(X_ + Random.Range(-2, 2), 0.1f, Z_ + Random.Range(-2, 2)), Quaternion.identity);
-		//	}
-		//}
-
 		RemoveFromList(Object_);
+
+
+		foreach (var item in System_Script.AllWorkers)
+		{
+			var WorkerScript = item.GetComponent<Lego_Character>();
+
+			if (WorkerScript.TaskObject == Object_)
+			{
+				item.GetComponent<Lego_Character>().DropOffTaskPointDestroyed = true;
+			}
+		}
 
 		Destroy(Object_);
 
@@ -263,6 +265,9 @@ public class Building_System : MonoBehaviour {
 		{
 			System_Script.ConstructionSites.Remove(Object);
 		}
+
+		System_Script.GetTotalStops();
+
 	}
 
 }
