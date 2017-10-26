@@ -99,6 +99,15 @@ public static class Utillity_Script
 			}
 		}
 
+		//find empty vehicles
+		if (ExtraCommands == ExtraCommands.FindEmptyVehicle)
+		{
+			if (destination.GetComponent<Lego_Character>().NeedDriver && destination.GetComponent<Lego_Character>().Driver == null)
+			{
+				yield return CalculatePath(character, destination);
+			}
+		}
+
 		//find the nearsest collectable that is not being collected or to be collected by a different user
 		if (ExtraCommands == ExtraCommands.FindUnTargeted)
 		{
@@ -175,6 +184,15 @@ public static class Utillity_Script
 			if(shortest.Object.GetComponent<Work_Script>().Worker == false && shortest.Length != float.MaxValue)
 			{
 				shortest.Object.GetComponent<Work_Script>().Worker = LegoUnit.gameObject;
+			}
+		}
+
+		if (ExtraCommands == ExtraCommands.FindEmptyVehicle)
+		{
+			if (shortest.Object.GetComponent<Lego_Character>().Driver == null && shortest.Length != float.MaxValue)
+			{
+				shortest.Object.GetComponent<Lego_Character>().Driver = LegoUnit.gameObject;
+				LegoUnit.gameObject.GetComponent<Lego_Character>().Vehicle = shortest.Object;
 			}
 		}
 

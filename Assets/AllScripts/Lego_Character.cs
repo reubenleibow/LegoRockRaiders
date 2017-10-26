@@ -15,8 +15,7 @@ public enum CurrentJob
 	WanderAroungWithItem,
 	ClearingRubble,
 	ConstructionWorker,
-
-
+	WalkingToVehicle,
 }
 
 public enum TaskChassis
@@ -29,7 +28,8 @@ public enum TaskChassis
 	JWalking,
 	Drilling,
 	PackAwwayJunk,
-
+	Driver,
+	SeatedDriver,
 }
 
 public enum ExtraCommands
@@ -43,6 +43,7 @@ public enum ExtraCommands
 	FindUnTargetedObjects,
 	//used for construction
 	R_Ore_Crystal,
+	FindEmptyVehicle
 }
 
 
@@ -71,13 +72,16 @@ public class Lego_Character : MonoBehaviour
 	public bool CanCarryOre = true;
 	public bool CanCarryCrystals = true;
 	public bool CanCarryStops = true;
-	public bool NeedDriver = false;
 	public bool CanDrive = true;
 
+	public bool NeedDriver = false;
+	public bool DriverSeated = false;
 	public GameObject Driver;
+	public GameObject DriverSeat;
+	public GameObject Vehicle;
+
 	private int DrillStrength = 50;
 	public bool Arrived = false;
-
 
 	//Current Tasks(No changes doen here)
 	public float DistFromJob;
@@ -103,26 +107,59 @@ public class Lego_Character : MonoBehaviour
 
 	void Update()
 	{
+		if (Vehicle != null && TaskChassis == TaskChassis.SeatedDriver)
+		{
+			if(Vehicle.GetComponent<Lego_Character>().DriverSeated == false)
+			{
+				Vehicle.GetComponent<Lego_Character>().DriverSeated = true;
+			}
+		}
+
+		if(TaskChassis == TaskChassis.SeatedDriver)
+		{
+			this.transform.position = Vehicle.transform.position;
+			this.transform.eulerAngles = Vehicle.transform.eulerAngles;
+			this.GetComponent<NavMeshAgent>().enabled = false;
+		}
+
+		//check if it say that it has a driver but not actually
+		if (Driver != null && NeedDriver)
+		{
+			var driver = Driver.GetComponent<Lego_Character>().TaskObject;
+
+			if(driver != this.gameObject)
+			{
+				Driver = null;
+
+				if (!System_Script.AllVehicles.Contains(this.gameObject))
+				{
+					System_Script.AllVehicles.Add(this.gameObject);
+				}
+			}
+			else
+			{
+				if (System_Script.AllVehicles.Contains(this.gameObject))
+				{
+					System_Script.AllVehicles.Remove(this.gameObject);
+				}
+			}
+		}
+
 		if(NeedDriver && Driver == null)
 		{
 			UnSelectable = true;
-
-			if(System_Script.AllVehicles.Contains(this.gameObject))
-			{
-				System_Script.AllVehicles.Remove(this.gameObject);
-			}
-		}
-		else
-		{
-			UnSelectable = false;
 
 			if (!System_Script.AllVehicles.Contains(this.gameObject))
 			{
 				System_Script.AllVehicles.Add(this.gameObject);
 			}
 		}
+		else
+		{
+			UnSelectable = false;
+		}
 
-		if (!NeedDriver || (NeedDriver && Driver != null))
+		if (!NeedDriver && this.GetComponent<NavMeshAgent>().enabled  || (NeedDriver && DriverSeated && Driver != null && this.GetComponent<NavMeshAgent>().enabled) )
 		{
 			if(DropOffTaskPointDestroyed)
 			{
@@ -264,10 +301,13 @@ public class Lego_Character : MonoBehaviour
 			Parent.GetComponent<SelectCode>().Selectable = true;
 		}
 
-		if(Arrived == false && GetComponent<NavMeshAgent>().remainingDistance < 2)
+		if(GetComponent<NavMeshAgent>().enabled)
 		{
-			Arrived = true;
-			ArrivedAtDest();
+			if(Arrived == false && GetComponent<NavMeshAgent>().remainingDistance < 2)
+			{
+				Arrived = true;
+				ArrivedAtDest();
+			}
 		}
 	}
 
@@ -456,6 +496,12 @@ public class Lego_Character : MonoBehaviour
 			TaskChassis = TaskChassis.Nothing;
 			run = false;
 		}
+
+		if (CurrentTask == CurrentJob.WalkingToVehicle && run && TaskChassis == TaskChassis.Driver)
+		{
+			TaskChassis = TaskChassis.SeatedDriver;
+			run = false;
+		}
 	}
 
 	// this must be set by priorities
@@ -470,6 +516,7 @@ public class Lego_Character : MonoBehaviour
 				TaskChassis = TaskChassis.GatherCrystals;
 				FindAndCollectCrystal();
 			}
+
 
 			if (System_Script.CollectableOre.Count > 0 && CanCarryOre)
 			{
@@ -493,6 +540,14 @@ public class Lego_Character : MonoBehaviour
 			{
 				TaskChassis = TaskChassis.GatherStops;
 				FindAndCollectStops();
+			}
+
+			if (System_Script.AllVehicles.Count > 0 && CanDrive)
+			{
+				TaskChassis = TaskChassis.Driver;
+				Debug.Log("Find car");
+				Debug.Log("Count:" + System_Script.AllVehicles.Count);
+				FindVehicle();
 			}
 		}
 	}
@@ -530,6 +585,18 @@ public class Lego_Character : MonoBehaviour
 		}
 	}
 
+	public void FindVehicle()
+	{
+		var shortestPath = this.ShortestPath(System_Script.AllVehicles, ExtraCommands.FindEmptyVehicle);
+
+		if (shortestPath.Length != float.MaxValue)
+		{
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+			StartDriverProcess();
+		}
+	}
+
+
 	public void FindAndClearRubble()
 	{
 		var shortestPath = this.ShortestPath(System_Script.ClearRubble, ExtraCommands.FindUnTargetedObjects);
@@ -566,6 +633,12 @@ public class Lego_Character : MonoBehaviour
 	public void StartClearingProcess()
 	{
 		CurrentTask = CurrentJob.WalkingToRubble;
+		DistFromJob = float.MaxValue;
+	}
+
+	public void StartDriverProcess()
+	{
+		CurrentTask = CurrentJob.WalkingToVehicle;
 		DistFromJob = float.MaxValue;
 	}
 }
