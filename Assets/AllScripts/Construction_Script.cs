@@ -203,7 +203,10 @@ public class Construction_Script : MonoBehaviour {
 	{
 		if(!Fake)
 		{
-			if(CompletedConstruction && ConstructionType == ConstructionTypes.PowerPath)
+			var script = systemObj.GetComponent<Building_System>();
+			var script1 = systemObj.GetComponent<StartConstruction>();
+
+			if (CompletedConstruction && ConstructionType == ConstructionTypes.PowerPath)
 			{
 				var newPowerpathcomplete = Instantiate(AllBuildings.PowerPathComplete, this.transform.position, Quaternion.identity);
 				var X = Mathf.Round(this.transform.position.x / 12);
@@ -215,8 +218,7 @@ public class Construction_Script : MonoBehaviour {
 
 			if (CompletedConstruction && ConstructionType == ConstructionTypes.ToolStore)
 			{
-				var script = systemObj.GetComponent<Building_System>();
-				var script1 = systemObj.GetComponent<StartConstruction>();
+				
 				var building = Instantiate(script.ToolStore, this.transform.position, Quaternion.identity);
 			    building.transform.eulerAngles = Angle;
 				var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
@@ -226,12 +228,19 @@ public class Construction_Script : MonoBehaviour {
 
 			if (CompletedConstruction && ConstructionType == ConstructionTypes.Teleportpad)
 			{
-				var script = systemObj.GetComponent<Building_System>();
-				var script1 = systemObj.GetComponent<StartConstruction>();
 				var building = Instantiate(script.Teleportpad, this.transform.position, Quaternion.identity);
 			    building.transform.eulerAngles = Angle;
 
 			    var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
+				path.transform.tag = "ConstructionPath";
+			}
+
+			if (CompletedConstruction && ConstructionType == ConstructionTypes.SupportStation)
+			{
+				var building = Instantiate(script.SupportStation, this.transform.position, Quaternion.identity);
+				building.transform.eulerAngles = Angle;
+
+				var path = Instantiate(script1.ExtraPath, this.transform.position, Quaternion.identity);
 				path.transform.tag = "ConstructionPath";
 			}
 		}

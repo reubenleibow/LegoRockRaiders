@@ -13,6 +13,7 @@ public enum ConstructionTypes
 	PowerPath,
 	ToolStore,
 	Teleportpad,
+	SupportStation,
 	Nothing,
 	Building,
 }
@@ -76,6 +77,14 @@ public class StartConstruction : MonoBehaviour
 		RaycastHit dest;
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
+		var cancel = false;
+		var overUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+
+		if (overUI)
+		{
+			cancel = true;
+		}
+
 		if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")))
 		{
 			if (dest.collider.gameObject.transform.tag == "Terrain")
@@ -97,6 +106,10 @@ public class StartConstruction : MonoBehaviour
 				BuildingStopsList.Clear();
 
 				//Loops through the BuildingplansSquares to create the powerpaths for buildings
+
+				if(!cancel)
+				{
+
 				foreach (var square in BuildingSquareList.ToArray())
 				{
 					var name = square.Square.transform.name;
@@ -143,6 +156,7 @@ public class StartConstruction : MonoBehaviour
 					Building_System.BuildingGrid[PosX, PosZ].B_Types = BuildingTypes.Building;
 					Building_System.BuildingGrid[PosX, PosZ].Object = MainNewBuildSite;
 					Building_System.BuildingGrid[PosX, PosZ].Object.GetComponent<Construction_Script>().ExtraPaths.Add(CurrentNewBuilding);
+				}
 				}
 
 				if(BuildingStopsList.Count > 0)
@@ -232,6 +246,20 @@ public class StartConstruction : MonoBehaviour
 			var Z_ = item.Z;
 			var XNew = item.X;
 			var ZNew = item.Z;
+			//var TileObject = Building_System.BuildingGrid[X_, Z_].B_Types;
+			//var Name_ = item.Square.transform.name;
+
+			//if (TileObject == BuildingTypes.Nothing)
+			//{
+			//	if(Name_ == "Y")
+			//	{
+			//	//	item.Square
+			//	}
+			//}
+			//else
+			//{
+
+			//}
 
 			if (ConstructionAngle == ConstructionAngle.Up)
 			{
@@ -267,7 +295,7 @@ public class StartConstruction : MonoBehaviour
 	{
 		B_Type = BuildingGroundType.one_one;
 		ConstructionTypes = ConstructionTypes.ToolStore;
-		SetRequirements(1, 0, 0);
+		SetRequirements(0, 0, 0);
 		CreateBuildingSquare(0, 0, 0);
 		CreateBuildingSquare(0, -1, 1);
 	}
@@ -287,14 +315,24 @@ public class StartConstruction : MonoBehaviour
 	{
 		B_Type = BuildingGroundType.one_one;
 		ConstructionTypes = ConstructionTypes.Teleportpad;
-		SetRequirements(8, 0, 6);
+		SetRequirements(8, 0, 4);
 		CreateBuildingSquare(0, 0, 0);
-		CreateBuildingSquare(1, 0, 0);
+		//CreateBuildingSquare(1, 0, 0);
 
 		CreateBuildingSquare(0, -1, 1);
-		CreateBuildingSquare(1, -1, 1);
+		//CreateBuildingSquare(1, -1, 1);
 
 	}
+
+	public void On_Click_SupportStation()
+	{
+		B_Type = BuildingGroundType.one_one;
+		ConstructionTypes = ConstructionTypes.SupportStation;
+		SetRequirements(0, 2, 4);
+		CreateBuildingSquare(0, 0, 0);
+		CreateBuildingSquare(0, -1, 1);
+	}
+
 
 	// building plan types
 	public void CreateBuildingSquare(int X, int Z, int Type)

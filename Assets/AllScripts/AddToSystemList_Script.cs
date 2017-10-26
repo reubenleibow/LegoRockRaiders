@@ -7,8 +7,7 @@ public class AddToSystemList_Script : MonoBehaviour {
 	public bool IsToolStore = false;
 	public bool IsPowerStation = false;
 	public bool IsBuilding = false;
-
-	//public GameObject 
+	public bool IsVehicle = false;
 
 	// Use this for initialization
 	void Start ()
@@ -24,6 +23,9 @@ public class AddToSystemList_Script : MonoBehaviour {
 
 		if (IsBuilding)
 			System_Script.AllBuildings.Add(this.gameObject);
+
+		if (IsVehicle)
+			System_Script.AllVehicles.Add(this.gameObject);
 	}
 	
 	// Update is called once per frame

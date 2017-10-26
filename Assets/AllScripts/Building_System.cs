@@ -43,6 +43,8 @@ public class Building_System : MonoBehaviour {
 
 	public GameObject ToolStore;
 	public GameObject Teleportpad;
+	public GameObject SupportStation;
+
 	public GameObject Stops;
 
 	public List<GameObject> CorrectWorkersList = new List<GameObject>();

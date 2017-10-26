@@ -24,6 +24,7 @@ public enum TaskChassis
 	GatherOre,
 	GatherStops,
 	GatherCrystals,
+	Sweeping,
 	Nothing,
 	JWalking,
 	Drilling,
@@ -66,6 +67,14 @@ public class Lego_Character : MonoBehaviour
 	//Propeties
 	public bool UnSelectable = false;
 	public bool CanDrill = true;
+	public bool CanSweep = true;
+	public bool CanCarryOre = true;
+	public bool CanCarryCrystals = true;
+	public bool CanCarryStops = true;
+	public bool NeedDriver = false;
+	public bool CanDrive = true;
+
+	public GameObject Driver;
 	private int DrillStrength = 50;
 	public bool Arrived = false;
 
@@ -94,66 +103,86 @@ public class Lego_Character : MonoBehaviour
 
 	void Update()
 	{
-		if(DropOffTaskPointDestroyed)
+		if(NeedDriver && Driver == null)
 		{
-			TaskObject = null;
-			Debug.Log("Drop off command" + System_Script.ConstructionSites.Count);
-			FindNearestCollectableDropOff();
-			DropOffTaskPointDestroyed = false;
-		}
+			UnSelectable = true;
 
-		//if the user says that it has an item in hand but it does not the set defalut
-		if(Items.Count == 0 && ItemType != CollectableType.Nothing)
-		{
-			ItemType = CollectableType.Nothing;
-		}
-
-		//doing nothing than find an obnject
-		if(CurrentTask == CurrentJob.Nothing && TaskChassis != TaskChassis.JWalking && !UnSelectable)
-		{
-			SetNextJob();
-		}
-
-		//arrived at a target
-		if(GetComponent<NavMeshAgent>().remainingDistance > 2)
-		{
-			Arrived = false;
-		}
-
-		//detecting if the rock that the raider must mine is in range using ray caster method
-		if (TaskObject != null)
-		{
-			var Ray = Physics.Linecast(new Vector3(transform.position.x, 1, transform.position.z),
-										new Vector3(TaskObject.transform.position.x, 1, TaskObject.transform.position.z),
-										out TaskPoint);
-
-
-			var DirectDistance = Vector3.Distance(transform.position, TaskObject.transform.position);
-
-			if (Ray)
+			if(System_Script.AllVehicles.Contains(this.gameObject))
 			{
-				var TagName = TaskPoint.collider.gameObject.transform.tag;
-				var HasParent = TagName == "Rock";
+				System_Script.AllVehicles.Remove(this.gameObject);
+			}
+		}
+		else
+		{
+			UnSelectable = false;
 
-				//only tag neededs to be edited
-				if (HasParent)
+			if (!System_Script.AllVehicles.Contains(this.gameObject))
+			{
+				System_Script.AllVehicles.Add(this.gameObject);
+			}
+		}
+
+		if (!NeedDriver || (NeedDriver && Driver != null))
+		{
+			if(DropOffTaskPointDestroyed)
+			{
+				TaskObject = null;
+				FindNearestCollectableDropOff();
+				DropOffTaskPointDestroyed = false;
+			}
+
+			//if the user says that it has an item in hand but it does not the set defalut
+			if(Items.Count == 0 && ItemType != CollectableType.Nothing)
+			{
+				ItemType = CollectableType.Nothing;
+			}
+
+			//doing nothing than find an obnject
+			if(CurrentTask == CurrentJob.Nothing && TaskChassis != TaskChassis.JWalking && !UnSelectable)
+			{
+				SetNextJob();
+			}
+
+			//arrived at a target
+			if(GetComponent<NavMeshAgent>().remainingDistance > 2)
+			{
+				Arrived = false;
+			}
+
+			//detecting if the rock that the raider must mine is in range using ray caster method
+			if (TaskObject != null)
+			{
+				var Ray = Physics.Linecast(new Vector3(transform.position.x, 1, transform.position.z),
+											new Vector3(TaskObject.transform.position.x, 1, TaskObject.transform.position.z),
+											out TaskPoint);
+
+				var DirectDistance = Vector3.Distance(transform.position, TaskObject.transform.position);
+
+				if (Ray)
 				{
-					if (TaskPoint.collider.gameObject.transform.parent.gameObject == TaskObject)
+					var TagName = TaskPoint.collider.gameObject.transform.tag;
+					var HasParent = TagName == "Rock";
+
+					//only tag neededs to be edited
+					if (HasParent)
 					{
-						DistFromJob = Vector3.Distance(transform.position, TaskPoint.point);
-					}
-					else
-					{
-						DistFromJob = float.MaxValue;
+						if (TaskPoint.collider.gameObject.transform.parent.gameObject == TaskObject)
+						{
+							DistFromJob = Vector3.Distance(transform.position, TaskPoint.point);
+						}
+						else
+						{
+							DistFromJob = float.MaxValue;
+						}
 					}
 				}
-			}
-			else
-			{
-				DistFromJob = DirectDistance;
-			}
+				else
+				{
+					DistFromJob = DirectDistance;
+				}
 
-			if (DistFromJob <= Constants.MinDrillDistance)
+				//Start Drilling or sweeping oce within distance of task
+				if (DistFromJob <= Constants.MinDrillDistance)
 			{
 				if (CurrentTask == CurrentJob.WalkingToDrill)
 				{
@@ -164,27 +193,25 @@ public class Lego_Character : MonoBehaviour
 				{
 					StartClearingRubble();
 				}
-
-				//arrived at crystal and pick it up.
-				if (CurrentTask == CurrentJob.WalkToCollectable && TaskObject != null)
-				{
-					if (TaskObject.GetComponent<Collectable>().Collector == gameObject)
-						PickUpCollectable();
-				}
 			}
-
-			if (CurrentTask == CurrentJob.Drilling)
+				//arrived at crystal and pick it up.
+				if (CurrentTask == CurrentJob.WalkToCollectable && TaskObject != null && DistFromJob <= Constants.MinDrillDistance)
+			{
+				if (TaskObject.GetComponent<Collectable>().Collector == gameObject)
+					PickUpCollectable();
+			}
+				//procede to next stage
+				if (CurrentTask == CurrentJob.Drilling)
 			{
 				Drilling();
 			}
-
-			if (CurrentTask == CurrentJob.ClearingRubble)
+				//procede to next stage
+				if (CurrentTask == CurrentJob.ClearingRubble)
 			{
 				ClearingRubble();
 			}
-
-			//place collectable at base
-			if (CurrentTask == CurrentJob.DropOffCollectable || CurrentTask == CurrentJob.ConstructionWorker)
+				//place collectable at base
+				if (CurrentTask == CurrentJob.DropOffCollectable || CurrentTask == CurrentJob.ConstructionWorker)
 			{
 				var distance = Vector3.Distance(transform.position, TaskObject.transform.position);
 
@@ -225,8 +252,9 @@ public class Lego_Character : MonoBehaviour
 					}
 				}
 			}
-		}
+			}
 
+		}
 		if (UnSelectable)
 		{
 			Parent.GetComponent<SelectCode>().Selectable = false;
@@ -437,40 +465,31 @@ public class Lego_Character : MonoBehaviour
 		{
 			TaskChassis = TaskChassis.Nothing;
 
-			if (System_Script.CollectableCrystals.Count > 0)
+			if (System_Script.CollectableCrystals.Count > 0 && CanCarryCrystals)
 			{
-				//if (TaskChassis == TaskChassis.GatherCrystals || TaskChassis == TaskChassis.Nothing)
+				TaskChassis = TaskChassis.GatherCrystals;
 				FindAndCollectCrystal();
 			}
 
-			if (System_Script.CollectableOre.Count > 0)
+			if (System_Script.CollectableOre.Count > 0 && CanCarryOre)
 			{
 				TaskChassis = TaskChassis.GatherOre;
-			}
-
-			if (System_Script.CollectableOre.Count > 0 && TaskChassis == TaskChassis.GatherOre)
-			{
-				//if (TaskChassis == TaskChassis.GatherOre)
 				FindAndCollectOre();
 			}
 
-
-			if (System_Script.DrillRocks.Count > 0)
+			if (System_Script.DrillRocks.Count > 0 && CanDrill)
 			{
 				TaskChassis = TaskChassis.Drilling;
-			}
-
-			if (System_Script.DrillRocks.Count > 0 && TaskChassis == TaskChassis.Drilling)
-			{
 				FindAndDrillRocks();
 			}
 
-			if (System_Script.ClearRubble.Count > 0)
+			if (System_Script.ClearRubble.Count > 0 && CanSweep)
 			{
 				FindAndClearRubble();
+				TaskChassis = TaskChassis.Sweeping;
 			}
 
-			if (System_Script.CollectableStops.Count > 0)
+			if (System_Script.CollectableStops.Count > 0 && CanCarryStops)
 			{
 				TaskChassis = TaskChassis.GatherStops;
 				FindAndCollectStops();
@@ -549,6 +568,4 @@ public class Lego_Character : MonoBehaviour
 		CurrentTask = CurrentJob.WalkingToRubble;
 		DistFromJob = float.MaxValue;
 	}
-
-
 }

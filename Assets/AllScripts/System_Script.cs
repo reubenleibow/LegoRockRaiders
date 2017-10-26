@@ -13,6 +13,7 @@ public partial class System_Script : MonoBehaviour
 	public static List<GameObject> ListOfAllPowerStations = new List<GameObject>();
 	public static List<GameObject> AllBuildings = new List<GameObject>();
 	public static List<GameObject> AllWorkers = new List<GameObject>();
+	public static List<GameObject> AllVehicles = new List<GameObject>();
 
 	//actual collectable gameobjects currently in the game being played
 	public static List<GameObject> AllCrystals = new List<GameObject>();
@@ -118,7 +119,19 @@ public partial class System_Script : MonoBehaviour
 
 		if (SelectedGameObjects.Count > 0)
 		{
-			CurrentMenuBarNumber = 2;
+			var SObject = SelectedGameObjects[0].GetComponent<AddToSystemList_Script>();
+
+			if(SObject.IsRaider)
+			{
+				CurrentMenuBarNumber = 2;
+
+			}
+
+			 if (SObject.IsBuilding)
+			 {
+
+				CurrentMenuBarNumber = 7;
+			 }
 		}
 
 		Update2();
@@ -412,8 +425,6 @@ public partial class System_Script : MonoBehaviour
 				}
 			}
 		}
-
-		
 	}
 
 	//Work on Code
@@ -426,6 +437,11 @@ public partial class System_Script : MonoBehaviour
 		}
 
 		CurrentMenuBarNumber = 1;
+	}
+
+	public void Onclick_CreateSmallVehicle()
+	{
+		CurrentMenuBarNumber = 8;
 	}
 
 	public void OnClick_ClearRubble()
