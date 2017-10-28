@@ -53,18 +53,6 @@ public class Construction_Script : MonoBehaviour {
 		AllBuildings = systemObj.GetComponent<AllBuildings>();
 		Building_System = systemObj.GetComponent<Building_System>();
 		GameScript = systemObj.GetComponent<Game_Script>();
-
-
-		//if (ConstructionType == ConstructionTypes.Teleportpad)
-		//{
-		//	RequiredStopsListPoints.Add(StopPoint1);
-		//	RequiredStopsListPoints.Add(StopPoint2);
-		//	RequiredStopsListPoints.Add(StopPoint3);
-		//	RequiredStopsListPoints.Add(StopPoint4);
-		//}
-		//
-		//Debug.Log(RequiredStopsListPoints.Count);
-
 	}
 
 	// Update is called once per frame

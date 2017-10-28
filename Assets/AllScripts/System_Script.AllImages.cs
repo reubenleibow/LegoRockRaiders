@@ -14,24 +14,14 @@ partial class System_Script
 	public Image Menu_6_Background;
 	public Image Menu_7_Background;
 	public Image Menu_8_Background;
-
+	public Image Menu_9_Background;
+	public Image Menu_10_Background;
 
 
 
 
 	public Material Yellow;
 	public Material Red_1;
-
-
-
-
-
-
-
-
-
-
-
 	public Material Green;
 
 
@@ -50,10 +40,8 @@ partial class System_Script
 			Menu_6_Background.gameObject,
 			Menu_7_Background.gameObject,
 			Menu_8_Background.gameObject,
-
-
-
-
+			Menu_9_Background.gameObject,
+			Menu_10_Background.gameObject,
 
 
 		});

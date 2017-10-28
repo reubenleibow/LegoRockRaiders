@@ -96,7 +96,6 @@ public class Building_System : MonoBehaviour {
 
 				if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")) && !cancel)
 				{
-				Debug.Log(dest.collider);
 					var P = dest.point;
 					var X_ = (Mathf.Round(P.x / SelectorSize)) * SelectorSize;
 					var Z_ = (Mathf.Round(P.z / SelectorSize)) * SelectorSize;
@@ -109,6 +108,7 @@ public class Building_System : MonoBehaviour {
 					if (dest.collider.gameObject.transform.tag == "Terrain")
 					{
 						System_Script.selectedGameObject = null;
+						Debug.Log("Clear raider list");
 						System_Script.SelectedGameObjects.Clear();
 						OnterrainClick = true;
 

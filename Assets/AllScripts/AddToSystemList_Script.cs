@@ -24,8 +24,8 @@ public class AddToSystemList_Script : MonoBehaviour {
 		if (IsBuilding)
 			System_Script.AllBuildings.Add(this.gameObject);
 
-		if (IsVehicle)
-			System_Script.AllVehicles.Add(this.gameObject);
+		//if (IsVehicle)
+		//	System_Script.AllVehicles.Add(this.gameObject);
 	}
 	
 	// Update is called once per frame

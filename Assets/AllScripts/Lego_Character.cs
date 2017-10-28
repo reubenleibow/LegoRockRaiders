@@ -28,8 +28,8 @@ public enum TaskChassis
 	JWalking,
 	Drilling,
 	PackAwwayJunk,
-	Driver,
-	SeatedDriver,
+	VehicleProperties,
+	IsDriving,
 }
 
 public enum ExtraCommands
@@ -74,8 +74,9 @@ public class Lego_Character : MonoBehaviour
 	public bool CanCarryStops = true;
 	public bool CanDrive = true;
 
-	public bool NeedDriver = false;
-	public bool DriverSeated = false;
+	public bool DriverIsSeated = false;
+	public bool IsDriving = false;
+	public bool CallForDriver = false; 
 	public GameObject Driver;
 	public GameObject DriverSeat;
 	public GameObject Vehicle;
@@ -96,38 +97,75 @@ public class Lego_Character : MonoBehaviour
 
 
 	public System_Script SystemSrpt;
+	public AddToSystemList_Script AddToSystem_Srpt;
+	public NavMeshAgent navMeshAgent_SC;
 
 	void Start()
 	{
 		Parent = gameObject;
-		//SelectCode = GetComponent<SelectCode>();
 		System_Script.AllWorkers.Add(this.gameObject);
 		SystemSrpt = GameObject.Find("System").GetComponent<System_Script>();
+		navMeshAgent_SC = this.GetComponent<NavMeshAgent>();
+		AddToSystem_Srpt = this.GetComponent<AddToSystemList_Script>();
 	}
 
 	void Update()
 	{
-		if (Vehicle != null && TaskChassis == TaskChassis.SeatedDriver)
+		//If ther raider is in the car and seated then play set IsdriverSeated = true;
+		if (Vehicle != null && TaskChassis == TaskChassis.IsDriving)
 		{
-			if(Vehicle.GetComponent<Lego_Character>().DriverSeated == false)
+			var IsDriverSeated_ = Vehicle.GetComponent<Lego_Character>().DriverIsSeated;
+
+			if (IsDriverSeated_)
 			{
-				Vehicle.GetComponent<Lego_Character>().DriverSeated = true;
+				IsDriverSeated_ = true;
+			}
+			else
+			{
+				IsDriverSeated_ = false;
 			}
 		}
 
-		if(TaskChassis == TaskChassis.SeatedDriver)
+		if(AddToSystem_Srpt.IsVehicle)
+		{
+			if(DriverIsSeated)
+			{
+				navMeshAgent_SC.enabled = true;
+			}
+			else
+			{
+				navMeshAgent_SC.enabled = false;
+			}
+		}
+
+		if(TaskChassis == TaskChassis.IsDriving)
+		{
+			IsDriving = true;
+			
+		}
+		else
+		{
+			IsDriving = false;
+		}
+
+		if(IsDriving)
 		{
 			this.transform.position = Vehicle.transform.position;
 			this.transform.eulerAngles = Vehicle.transform.eulerAngles;
-			this.GetComponent<NavMeshAgent>().enabled = false;
+			navMeshAgent_SC.enabled = false;
+			UnSelectable = true;
+		}
+		else
+		{
+			navMeshAgent_SC.enabled = true;
 		}
 
 		//check if it say that it has a driver but not actually
-		if (Driver != null && NeedDriver)
+		if (Driver != null && CallForDriver)
 		{
-			var driver = Driver.GetComponent<Lego_Character>().TaskObject;
+			var driverTaskObject = Driver.GetComponent<Lego_Character>().TaskObject;
 
-			if(driver != this.gameObject)
+			if(driverTaskObject != this.gameObject)
 			{
 				Driver = null;
 
@@ -145,21 +183,15 @@ public class Lego_Character : MonoBehaviour
 			}
 		}
 
-		if(NeedDriver && Driver == null)
+		if (Driver == null && CallForDriver)
 		{
-			UnSelectable = true;
-
 			if (!System_Script.AllVehicles.Contains(this.gameObject))
 			{
 				System_Script.AllVehicles.Add(this.gameObject);
 			}
 		}
-		else
-		{
-			UnSelectable = false;
-		}
 
-		if (!NeedDriver && this.GetComponent<NavMeshAgent>().enabled  || (NeedDriver && DriverSeated && Driver != null && this.GetComponent<NavMeshAgent>().enabled) )
+		if (!AddToSystem_Srpt.IsVehicle && navMeshAgent_SC.enabled  || (AddToSystem_Srpt.IsVehicle && DriverIsSeated  && navMeshAgent_SC.enabled) )
 		{
 			if(DropOffTaskPointDestroyed)
 			{
@@ -175,7 +207,7 @@ public class Lego_Character : MonoBehaviour
 			}
 
 			//doing nothing than find an obnject
-			if(CurrentTask == CurrentJob.Nothing && TaskChassis != TaskChassis.JWalking && !UnSelectable)
+			if(CurrentTask == CurrentJob.Nothing && TaskChassis != TaskChassis.JWalking)
 			{
 				SetNextJob();
 			}
@@ -289,7 +321,7 @@ public class Lego_Character : MonoBehaviour
 					}
 				}
 			}
-			}
+		}
 
 		}
 		if (UnSelectable)
@@ -497,9 +529,10 @@ public class Lego_Character : MonoBehaviour
 			run = false;
 		}
 
-		if (CurrentTask == CurrentJob.WalkingToVehicle && run && TaskChassis == TaskChassis.Driver)
+		if (CurrentTask == CurrentJob.WalkingToVehicle && run && TaskChassis == TaskChassis.VehicleProperties)
 		{
-			TaskChassis = TaskChassis.SeatedDriver;
+			TaskChassis = TaskChassis.IsDriving;
+			Vehicle.GetComponent<Lego_Character>().DriverIsSeated = true;
 			run = false;
 		}
 	}
@@ -544,9 +577,7 @@ public class Lego_Character : MonoBehaviour
 
 			if (System_Script.AllVehicles.Count > 0 && CanDrive)
 			{
-				TaskChassis = TaskChassis.Driver;
-				Debug.Log("Find car");
-				Debug.Log("Count:" + System_Script.AllVehicles.Count);
+				TaskChassis = TaskChassis.VehicleProperties;
 				FindVehicle();
 			}
 		}
@@ -585,16 +616,6 @@ public class Lego_Character : MonoBehaviour
 		}
 	}
 
-	public void FindVehicle()
-	{
-		var shortestPath = this.ShortestPath(System_Script.AllVehicles, ExtraCommands.FindEmptyVehicle);
-
-		if (shortestPath.Length != float.MaxValue)
-		{
-			GetComponent<NavMeshAgent>().SetPath(shortestPath);
-			StartDriverProcess();
-		}
-	}
 
 
 	public void FindAndClearRubble()
@@ -640,5 +661,35 @@ public class Lego_Character : MonoBehaviour
 	{
 		CurrentTask = CurrentJob.WalkingToVehicle;
 		DistFromJob = float.MaxValue;
+	}
+
+	public void SetToDefault()
+	{
+		CurrentTask = CurrentJob.Nothing;
+		DistFromJob = float.MaxValue;
+		TaskChassis = TaskChassis.Nothing;
+		TaskObject = null;
+		Vehicle = null;
+		UnSelectable = false;
+		this.GetComponent<NavMeshAgent>().enabled = true;
+	}
+
+	public void RaiderGotOutOfVehicle()
+	{
+		DriverIsSeated = false;
+		CallForDriver = false;
+		Driver = null;
+		SetToDefault();
+	}
+
+	public void FindVehicle()
+	{
+		var shortestPath = this.ShortestPath(System_Script.AllVehicles, ExtraCommands.FindEmptyVehicle);
+
+		if (shortestPath.Length != float.MaxValue)
+		{
+			GetComponent<NavMeshAgent>().SetPath(shortestPath);
+			StartDriverProcess();
+		}
 	}
 }

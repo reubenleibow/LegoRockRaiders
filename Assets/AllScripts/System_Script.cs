@@ -81,6 +81,7 @@ public partial class System_Script : MonoBehaviour
 	
 	void Update()
 	{
+		//Debug.Log(SelectedGameObjects.Count);
 		GetTotalStops();
 
 		SelectObjects();
@@ -101,13 +102,11 @@ public partial class System_Script : MonoBehaviour
 
 		if (MaxRaiders <= RaidersList.Count)
 		{
-			//CreateMan_Icon.interactable = false;
 			Icon_Script.Enable_CreatMan_I(false);
 		}
 		else
 		{
 			Icon_Script.Enable_CreatMan_I(true);
-			//CreateMan_Icon.interactable = true;
 		}
 
 		CreateMan_Icon_Text.text = CreateRaiderQue.ToString();
@@ -120,18 +119,27 @@ public partial class System_Script : MonoBehaviour
 		if (SelectedGameObjects.Count > 0)
 		{
 			var SObject = SelectedGameObjects[0].GetComponent<AddToSystemList_Script>();
+			var SObject_Core = SelectedGameObjects[0].GetComponent<Lego_Character>();
 
-			if(SObject.IsRaider)
+			if (SObject.IsRaider)
 			{
 				CurrentMenuBarNumber = 2;
-
 			}
 
 			 if (SObject.IsBuilding)
 			 {
-
 				CurrentMenuBarNumber = 7;
 			 }
+
+			if (SObject.IsVehicle && SObject_Core.Driver == null)
+			{
+				CurrentMenuBarNumber = 10;
+			}
+
+			if (SObject.IsVehicle && SObject_Core.Driver != null)
+			{
+				CurrentMenuBarNumber = 9;
+			}
 		}
 
 		Update2();
@@ -139,19 +147,24 @@ public partial class System_Script : MonoBehaviour
 
 	private void SelectObjects()
 	{
+		float selectingDistance;
 		//Drag Box Selection
 		if (Input.GetMouseButtonDown(0))
 		{
 			mouseScreenStart = Input.mousePosition;
-			//FocusedObject = Type.Nothing;
 		}
 
 		if (Input.GetMouseButton(0))
 		{
 			if (mouseScreenStart != Vector3.zero)
 			{
-				selecting = true;
 				mouseScreenCurrent = Input.mousePosition;
+				selectingDistance = Vector3.Distance(mouseScreenCurrent, mouseScreenStart);
+
+				if(selectingDistance > 1)
+				{
+					selecting = true;
+				}
 			}
 		}
 		else
@@ -246,7 +259,13 @@ public partial class System_Script : MonoBehaviour
 		Building_System.CurrentBuildingType = BuildingTypes.Nothing;
 		Building_System.CurrentObject = null;
 		CurrentMenuBarNumber = 1;
-		this.GetComponent<StartConstruction>().OnBackClicked();
+
+		foreach (var obj in AllSelectableGameObjects.ToArray())
+		{
+			obj.IsSelected = false;
+		}
+
+		SelectedGameObjects.Clear();
 	}
 
 	public void OnClick_Buid()
@@ -402,12 +421,6 @@ public partial class System_Script : MonoBehaviour
 			selectedGameObject = Point.collider.transform.parent.gameObject;
 		}
 
-		//if(Point.transform.tag == "Rubble")
-		//{
-		//	CurrentMenuBarNumber = 5;
-		//	selectedGameObject = Point.collider.gameObject;
-		//}
-
 		//for objects with colliders below parents
 		if (taskable)
 		{
@@ -453,6 +466,21 @@ public partial class System_Script : MonoBehaviour
 		}
 
 		CurrentMenuBarNumber = 1;
+	}
+
+	public void OnClick_Climbout()
+	{
+		var DiverOfTheVehicle = SelectedGameObjects[0].GetComponent<Lego_Character>().Driver;
+		var car = SelectedGameObjects[0].GetComponent<Lego_Character>();
+		DiverOfTheVehicle.GetComponent<Lego_Character>().SetToDefault();
+		car.RaiderGotOutOfVehicle();
+		OnClick_Back();
+	}
+
+	public void OnClick_CallRaider()
+	{
+		SelectedGameObjects[0].GetComponent<Lego_Character>().CallForDriver = true;
+		OnClick_Back();
 	}
 
 	public void DropItem()

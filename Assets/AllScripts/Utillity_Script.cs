@@ -102,7 +102,7 @@ public static class Utillity_Script
 		//find empty vehicles
 		if (ExtraCommands == ExtraCommands.FindEmptyVehicle)
 		{
-			if (destination.GetComponent<Lego_Character>().NeedDriver && destination.GetComponent<Lego_Character>().Driver == null)
+			if ( destination.GetComponent<Lego_Character>().Driver == null)
 			{
 				yield return CalculatePath(character, destination);
 			}
