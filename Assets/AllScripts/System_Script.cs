@@ -37,7 +37,7 @@ public partial class System_Script : MonoBehaviour
 	public static List<GameObject> RaidersList = new List<GameObject>();
 
 
-	private bool selecting = false;
+	public bool selecting = false;
 	private Vector3 mouseScreenStart = Vector2.zero;
 	private Vector3 mouseScreenCurrent = Vector2.zero;
 
@@ -69,7 +69,6 @@ public partial class System_Script : MonoBehaviour
 	public int TotalStopsNeeded = 0;
 
 
-
 	void Start()
 	{
 		Game_Script = this.GetComponent<Game_Script>();
@@ -81,9 +80,20 @@ public partial class System_Script : MonoBehaviour
 
 	void Update()
 	{
-		//Debug.Log(SelectedGameObjects.Count);
-		GetTotalStops();
+		var overUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+		var cancel = false;
 
+		if (!overUI)
+		{
+			cancel = true;
+		}
+
+		if (Input.GetMouseButtonDown(0) && cancel && SelectedGameObjects.Count> 0)
+		{
+			OnClick_Back();
+		}
+
+		GetTotalStops();
 		SelectObjects();
 
 		foreach (var obj in AllSelectableGameObjects.ToArray())
@@ -167,8 +177,11 @@ public partial class System_Script : MonoBehaviour
 				}
 			}
 		}
-		else
+
+		if(Input.GetMouseButtonUp(0))
 		{
+			Building_System.OnMouseRelease(selecting);
+
 			selecting = false;
 			mouseScreenStart = Vector2.zero;
 			mouseScreenCurrent = Vector2.zero;
@@ -198,7 +211,7 @@ public partial class System_Script : MonoBehaviour
 			SelectionBoxImage.transform.position = new Vector3(minX, minY);
 		}
 	}
-	//moving the unit to the destination;
+
 	public void Update2()
 	{
 		RaycastHit dest;
@@ -216,7 +229,6 @@ public partial class System_Script : MonoBehaviour
 					obj.GetComponent<Lego_Character>().MoveTo(destination);
 				}
 			}
-
 			OnRightClick(dest);
 		}
 
@@ -256,6 +268,7 @@ public partial class System_Script : MonoBehaviour
 		Building_System.CurrentBuildingType = BuildingTypes.Nothing;
 		Building_System.CurrentObject = null;
 		CurrentMenuBarNumber = 1;
+		Building_System.SelectorSquare.SetActive(false);
 
 		DeSelectAll();
 		SelectedGameObjects.Clear();
@@ -296,6 +309,12 @@ public partial class System_Script : MonoBehaviour
 			var Rock_Type = ClickedObject.GetComponent<Work_Script>().RockProperties.RockType;
 			Drillable = (Rock_Type == RockType.LooseRock || Rock_Type == RockType.SoftRock || Rock_Type == RockType.HardRock);
 		}
+
+		if (Point.transform.tag == "Terrain")
+		{
+			TaskAvaliable = false;
+		}
+
 		var PositionOfObject = new Vector3(ClickedObject.transform.position.x, 0, ClickedObject.transform.position.z);
 
 		foreach (var Unit in SelectedGameObjects)
@@ -316,7 +335,17 @@ public partial class System_Script : MonoBehaviour
 			}
 			else
 			{
-				Unit_.CurrentTask = CurrentJob.WanderAroungWithItem;
+				if (Unit_.Items.Count > 0)
+				{
+					Unit_.CurrentTask = CurrentJob.WanderAroungWithItem;
+				}
+				else
+				{
+					Unit_.CurrentTask = CurrentJob.WalkToPoint;
+				}
+
+				Unit_.MoveTo(Point.point);
+				Debug.Log("called");
 			}
 
 			if (Point.transform.tag == "Rubble")
@@ -365,11 +394,11 @@ public partial class System_Script : MonoBehaviour
 		}
 	}
 
+	// currently only used for clicking on rocks
 	public void OnLeftClick(RaycastHit Point)
 	{
 		var taskable = false;
 		var Object = "";
-		//selectedGameObject = null;
 		Object = Point.transform.tag;
 
 		if (Object == "Rock")

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class Work_Script : MonoBehaviour {
+public class Work_Script : MonoBehaviour
+{
 
 	public enum ObjectType
 	{
@@ -22,7 +23,7 @@ public class Work_Script : MonoBehaviour {
 	public Building_System Building_System;
 	public Game_Script Game_Script;
 
-    public int OreCreated = 0;
+	public int OreCreated = 0;
 
 	private int SpreadX = 5;
 	private int SpreadY = 5;
@@ -33,18 +34,18 @@ public class Work_Script : MonoBehaviour {
 	public int X;
 	public int Y;
 
-	
+
 	// Use this for initialization
-	void Start ()
+	void Start()
 	{
 		System_ = GameObject.Find("System");
 		System_St = System_.GetComponent<System_Script>();
-        Game_Script = System_.GetComponent<Game_Script>();
-        Building_System = System_.GetComponent<Building_System>();
+		Game_Script = System_.GetComponent<Game_Script>();
+		Building_System = System_.GetComponent<Building_System>();
 	}
 
 	// Update is called once per frame
-	void Update ()
+	void Update()
 	{
 		if (RockProperties != null)
 		{
@@ -54,11 +55,11 @@ public class Work_Script : MonoBehaviour {
 
 		if (Worker != null)
 		{
-			if(Worker.GetComponent<Lego_Character>().TaskObject != this.gameObject)
+			if (Worker.GetComponent<Lego_Character>().TaskObject != this.gameObject)
 			{
 				Worker = null;
 
-				if(WorkedOn)
+				if (WorkedOn)
 				{
 					AddtoList();
 				}
@@ -70,19 +71,19 @@ public class Work_Script : MonoBehaviour {
 			}
 		}
 
-		if(Health <= 0)
+		if (Health <= 0)
 		{
-            if (Type == ObjectType.Rock)
-            {
-                Game_Script.EraseRock(X,Y);
-            }
+			if (Type == ObjectType.Rock)
+			{
+				Game_Script.EraseRock(X, Y);
+			}
 
-            Destroy(this.gameObject);
+			Destroy(this.gameObject);
 		}
 
-		if(Type == ObjectType.Rubble)
+		if (Type == ObjectType.Rubble)
 		{
-			if (Health <75 && Health > 70 && OreCreated == 0)
+			if (Health < 75 && Health > 70 && OreCreated == 0)
 			{
 				CreateOre();
 			}
@@ -110,7 +111,7 @@ public class Work_Script : MonoBehaviour {
 		{
 			ResetLegoUnit();
 
-			if(Building_System.BuildingGrid[X,Y].Object = this.gameObject)
+			if (Building_System.BuildingGrid[X, Y].Object = this.gameObject)
 			{
 				Building_System.FullReset(X, Y);
 			}
@@ -127,14 +128,14 @@ public class Work_Script : MonoBehaviour {
 			System_Script.DrillRocks.Remove(this.gameObject);
 		}
 
-		if(Health <= 0)
+		if (Health <= 0)
 		{
 			var POS = this.transform.position;
 
 			if (Type == ObjectType.Rock)
 			{
 				var Rubble = Instantiate(System_.GetComponent<System_Script>().Rubble, new Vector3(POS.x, 0.1f, POS.z), Quaternion.identity);
-				Building_System.BuildingGrid[X,Y].B_Types = BuildingTypes.Rubble;
+				Building_System.BuildingGrid[X, Y].B_Types = BuildingTypes.Rubble;
 				Building_System.BuildingGrid[X, Y].Object = Rubble;
 				Rubble.GetComponent<Work_Script>().X = X;
 				Rubble.GetComponent<Work_Script>().Y = Y;
@@ -143,9 +144,9 @@ public class Work_Script : MonoBehaviour {
 			}
 		}
 
-		foreach(var Unit in System_Script.SelectedGameObjects)
+		foreach (var Unit in System_Script.SelectedGameObjects)
 		{
-			if(Unit.GetComponent<Lego_Character>().TaskObject == this.gameObject)
+			if (Unit.GetComponent<Lego_Character>().TaskObject == this.gameObject)
 			{
 				var legounit = Unit.GetComponent<Lego_Character>();
 				legounit.TaskObject = null;
@@ -179,7 +180,7 @@ public class Work_Script : MonoBehaviour {
 		var rubblePos = this.transform.position;
 		var SpawnPos = new Vector3(rubblePos.x + SpawnPosX, 0, rubblePos.z + SpawnPosY);
 
-		var newore = Instantiate(System_St.Ore,SpawnPos, Quaternion.identity);
+		var newore = Instantiate(System_St.Ore, SpawnPos, Quaternion.identity);
 	}
 
 }
