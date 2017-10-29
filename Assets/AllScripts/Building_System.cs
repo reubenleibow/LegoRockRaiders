@@ -225,7 +225,13 @@ public class Building_System : MonoBehaviour
 
 		if (!selecting)
 		{
+
 			Ray ray0 = Camera.main.ScreenPointToRay(Input.mousePosition);
+			if (Physics.Raycast(ray0, out dest))
+			{
+				System_Script.OnClick_Back();
+				System_Script.OnLeftClick(dest);
+			}
 
 			if (Physics.Raycast(ray0, out dest))
 			{
@@ -270,11 +276,19 @@ public class Building_System : MonoBehaviour
 			if (System_Script.selectedGameObject != null || System_Script.SelectedGameObjects.Count != 0)
 			{
 				SelectorSquare.SetActive(false);
+
 			}
 		}
 		else
 		{
 			SelectorSquare.SetActive(false);
+
+			if (System_Script.SelectedGameObjects.Count == 0)
+			{
+
+				System_Script.OnClick_Back();
+			}
+
 		}
 	}
 }

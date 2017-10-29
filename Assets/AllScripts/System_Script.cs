@@ -88,10 +88,10 @@ public partial class System_Script : MonoBehaviour
 			cancel = true;
 		}
 
-		if (Input.GetMouseButtonDown(0) && cancel && SelectedGameObjects.Count> 0)
-		{
-			OnClick_Back();
-		}
+		//if (Input.GetMouseButtonDown(0) && cancel && SelectedGameObjects.Count> 0)
+		//{
+		//	OnClick_Back();
+		//}
 
 		GetTotalStops();
 		SelectObjects();
@@ -238,7 +238,7 @@ public partial class System_Script : MonoBehaviour
 
 			if (Physics.Raycast(ray, out dest))
 			{
-				OnLeftClick(dest);
+				//OnLeftClick(dest);
 			}
 		}
 	}
