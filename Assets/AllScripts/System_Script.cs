@@ -78,7 +78,7 @@ public partial class System_Script : MonoBehaviour
 
 		Initialise();
 	}
-	
+
 	void Update()
 	{
 		//Debug.Log(SelectedGameObjects.Count);
@@ -126,17 +126,17 @@ public partial class System_Script : MonoBehaviour
 				CurrentMenuBarNumber = 2;
 			}
 
-			 if (SObject.IsBuilding)
-			 {
+			if (SObject.IsBuilding)
+			{
 				CurrentMenuBarNumber = 7;
-			 }
+			}
 
-			if (SObject.IsVehicle && SObject_Core.Driver == null)
+			if (SObject.IsVehicle && !SObject_Core.DriverIsSeated)
 			{
 				CurrentMenuBarNumber = 10;
 			}
 
-			if (SObject.IsVehicle && SObject_Core.Driver != null)
+			if (SObject.IsVehicle && SObject_Core.Driver != null && SObject_Core.DriverIsSeated)
 			{
 				CurrentMenuBarNumber = 9;
 			}
@@ -161,7 +161,7 @@ public partial class System_Script : MonoBehaviour
 				mouseScreenCurrent = Input.mousePosition;
 				selectingDistance = Vector3.Distance(mouseScreenCurrent, mouseScreenStart);
 
-				if(selectingDistance > 1)
+				if (selectingDistance > 1)
 				{
 					selecting = true;
 				}
@@ -206,8 +206,6 @@ public partial class System_Script : MonoBehaviour
 		if (Input.GetMouseButtonDown(1))
 		{
 			Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out dest);
-
-
 			var destination = dest.point;
 
 			foreach (var obj in SelectedGameObjects)
@@ -215,12 +213,11 @@ public partial class System_Script : MonoBehaviour
 				//check if the unit selected can be moved before trying
 				if (obj.Movable == true)
 				{
-					obj.GetComponent<NavMeshAgent>().SetDestination(destination);
+					obj.GetComponent<Lego_Character>().MoveTo(destination);
 				}
 			}
 
 			OnRightClick(dest);
-
 		}
 
 		if (Input.GetMouseButtonDown(0))
@@ -260,11 +257,7 @@ public partial class System_Script : MonoBehaviour
 		Building_System.CurrentObject = null;
 		CurrentMenuBarNumber = 1;
 
-		foreach (var obj in AllSelectableGameObjects.ToArray())
-		{
-			obj.IsSelected = false;
-		}
-
+		DeSelectAll();
 		SelectedGameObjects.Clear();
 	}
 
@@ -275,133 +268,99 @@ public partial class System_Script : MonoBehaviour
 
 	public void OnRightClick(RaycastHit Point)
 	{
-		var Taskable = Point.transform.tag == "Rock" || Point.transform.tag == "Crystal" || Point.transform.tag == "Ore";
+		var hasParent = Point.transform.tag == "Rock" || Point.transform.tag == "Crystal" || Point.transform.tag == "Ore";
+		var Collectable = false;
+		var TaskAvaliable = true;
+		Collectable CollectableObjectScript = new Collectable();
+		GameObject ClickedObject = new GameObject();
+		var Drillable = false;
 
-		//Remove all tasked objects
+		if (hasParent)
+		{
+			ClickedObject = Point.collider.gameObject.transform.parent.gameObject;
+		}
+		else
+		{
+			ClickedObject = Point.collider.gameObject;
+		}
+
+		if (ClickedObject.GetComponent<Collectable>() != null)
+		{
+			CollectableObjectScript = ClickedObject.GetComponent<Collectable>();
+			Collectable = true;
+			CollectableObjectScript.HostChanged = false;
+		}
+
+		if (Point.transform.tag == "Rock")
+		{
+			var Rock_Type = ClickedObject.GetComponent<Work_Script>().RockProperties.RockType;
+			Drillable = (Rock_Type == RockType.LooseRock || Rock_Type == RockType.SoftRock || Rock_Type == RockType.HardRock);
+		}
+		var PositionOfObject = new Vector3(ClickedObject.transform.position.x, 0, ClickedObject.transform.position.z);
+
 		foreach (var Unit in SelectedGameObjects)
 		{
 			var Unit_ = Unit.GetComponent<Lego_Character>();
-			Unit_.TaskChassis = TaskChassis.JWalking;
-			Unit_.CurrentTask = CurrentJob.Nothing;
+			Unit_.SetToDefault();
 
+			if (TaskAvaliable)
+			{
+				if (Unit_.Items.Count > 0)
+				{
+					Unit_.Items[0].GetComponent<Collectable>().DropItem();
+					Unit_.Items.Clear();
+				}
 
-			Unit_.TaskObject = null;
-
-			if (Unit_.Items.Count > 0)
+				Unit_.TaskObject = ClickedObject;
+				Unit_.MoveTo(PositionOfObject);
+			}
+			else
 			{
 				Unit_.CurrentTask = CurrentJob.WanderAroungWithItem;
 			}
 
 			if (Point.transform.tag == "Rubble")
 			{
-				Unit_.TaskChassis = TaskChassis.Drilling;
-				Unit_.CurrentTask = CurrentJob.WalkingToRubble;
-				Unit_.DistFromJob = float.MaxValue;
-				Unit_.TaskObject = Point.collider.gameObject;
-				//-----------------------------------------------------------------------------DODGYCODE
-				if (Unit_.Items.Count > 0)
+				Unit_.StartClearingProcess();
+			}
+
+			if (ClickedObject.transform.tag == "Rock")
+			{
+				if (Unit_.CanDrill && Drillable)
 				{
-					Unit_.Items[0].GetComponent<Collectable>().DropItem();
-					Unit_.Items.Clear();
+					Unit_.StartDrillingProcess();
 				}
-				var pos = Point.collider.gameObject.transform.position;
-				Unit.GetComponent<NavMeshAgent>().SetDestination(new Vector3(pos.x,0,pos.z));
-			}
-		}
-
-		if (Taskable)
-		{
-			var Object_ = Point.collider.gameObject.transform.parent.gameObject;
-			var Collectable = Object_.GetComponent<Collectable>();
-			var Drillable = false;
-
-			if (Point.transform.tag == "Rock")
-			{
-				var Rock_Type = Object_.GetComponent<Work_Script>().RockProperties.RockType;
-
-				Drillable = (Rock_Type == RockType.LooseRock || Rock_Type == RockType.SoftRock || Rock_Type == RockType.HardRock);
 			}
 
-			//part(1/3)
-			if ((Point.transform.tag == "Crystal" || Point.transform.tag == "Ore"))
+			if (Collectable)
 			{
-				Collectable.HostChanged = false;
-			}
-
-
-			foreach (var Unit in SelectedGameObjects)
-			{
-				var Unit_ = Unit.GetComponent<Lego_Character>();
-				var NavMesh = Unit.GetComponent<NavMeshAgent>();
-
-				if (Point.transform.tag == "Rock")
+				TaskAvaliable = false;
+				//new host not been set
+				if (CollectableObjectScript.HostChanged == false)
 				{
-					if (Unit_.CanDrill && Drillable)
+					//if another raider is going for it then make that raider drop it
+					if (CollectableObjectScript.Collector != null)
 					{
-						Unit_.TaskChassis = TaskChassis.Drilling;
-						Unit_.CurrentTask = CurrentJob.WalkingToDrill;
-						Unit_.DistFromJob = float.MaxValue;
-						Unit_.TaskObject = Object_;
-						//-----------------------------------------------------------------------------DODGYCODE
-						if (Unit_.Items.Count > 0)
-						{
-							Unit_.Items[0].GetComponent<Collectable>().DropItem();
-							Unit_.Items.Clear();
-						}
-
+						CollectableObjectScript.ClearAllCollectors();
 					}
-				}
 
-				
+					Unit_.StartCollecting();
+					CollectableObjectScript.Collector = Unit_.gameObject;
 
-				var collectable = Object_.GetComponent<Collectable>();
-
-				//part(2/3)
-				if ((Point.transform.tag == "Crystal" || Point.transform.tag == "Ore"))
-				{
-
-					//new host not been set
-					if (collectable.HostChanged == false)
+					if (Point.transform.tag == "Crystal")
 					{
-						Unit_.TaskObject = Object_;
-
-						//if another raider is going for it then make that raider drop it
-						if (collectable.Collector != null)
-						{
-							collectable.ClearAllCollectors();
-						}
-
-						//If unit has an item in its hand then drop it.(edit here to make for multiple)
-						if (Unit_.Items.Count > 0)
-						{
-							Unit_.Items[0].GetComponent<Collectable>().DropItem();
-							Unit_.Items.Clear();
-						}
-
-						//set some values
-						Unit_.CurrentTask = CurrentJob.WalkToCollectable;
-						Unit_.DistFromJob = float.MaxValue;
-						collectable.Collector = Unit_.gameObject;
-
-						//part(3/3)
-						if (Point.transform.tag == "Crystal")
-						{
-							Unit_.ItemType = CollectableType.Crystal;
-							Unit_.TaskChassis = TaskChassis.GatherCrystals;
-						}
-
-						if (Point.transform.tag == "Ore")
-						{
-							Unit_.ItemType = CollectableType.Ore;
-							Unit_.TaskChassis = TaskChassis.GatherOre;
-						}
-
-						//Set host changed to true
-						collectable.HostChanged = true;
+						Unit_.ItemType = CollectableType.Crystal;
+						Unit_.TaskChassis = TaskChassis.GatherCrystals;
 					}
-				}
 
-				NavMesh.SetDestination(new Vector3(Object_.transform.position.x, 0,Object_.transform.position.z));
+					if (Point.transform.tag == "Ore")
+					{
+						Unit_.ItemType = CollectableType.Ore;
+						Unit_.TaskChassis = TaskChassis.GatherOre;
+					}
+
+					CollectableObjectScript.HostChanged = true;
+				}
 			}
 		}
 	}
@@ -485,12 +444,12 @@ public partial class System_Script : MonoBehaviour
 
 	public void DropItem()
 	{
-		if(SelectedGameObjects.Count > 0)
+		if (SelectedGameObjects.Count > 0)
 		{
-			foreach(var Unit in SelectedGameObjects)
+			foreach (var Unit in SelectedGameObjects)
 			{
 				var Unit_ = Unit.GetComponent<Lego_Character>();
-		
+
 				if (Unit_.Items.Count > 0)
 				{
 					Unit_.Items[0].GetComponent<Collectable>().DropItem();
@@ -515,5 +474,11 @@ public partial class System_Script : MonoBehaviour
 
 			TotalStopsNeeded = +stopsNo;
 		}
+	}
+
+	public void DeSelectAll()
+	{
+		foreach (var obj in AllSelectableGameObjects.ToArray())
+			obj.IsSelected = false;
 	}
 }

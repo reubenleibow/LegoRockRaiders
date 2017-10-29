@@ -125,6 +125,10 @@ public class Lego_Character : MonoBehaviour
 				IsDriverSeated_ = false;
 			}
 		}
+		if(Arrived && CurrentTask == CurrentJob.WanderAroungWithItem)
+		{
+			CurrentTask = CurrentJob.Nothing;
+		}
 
 		if(AddToSystem_Srpt.IsVehicle)
 		{
@@ -491,7 +495,7 @@ public class Lego_Character : MonoBehaviour
 
 			System_Script.CollectableStops.Remove(Items[0]);
 			var index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
-            Items[0].transform.rotation = TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints[index].transform.rotation;
+			Items[0].transform.rotation = TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints[index].transform.rotation;
 			Items[0].transform.eulerAngles += new Vector3(0,180,0);
 			Items[0].transform.position = new Vector3(Items[0].transform.position.x, 0.1f, Items[0].transform.position.z);
 
@@ -499,9 +503,9 @@ public class Lego_Character : MonoBehaviour
 
 			TaskObject.GetComponent<Construction_Script>().aquiredObj.Add(Items[0]);
 			Items[0].GetComponent<Collectable>().MakeStatic();
-            Items[0].GetComponent<Animation>().Play("Open");
+			Items[0].GetComponent<Animation>().Play("Open");
 
-        }
+		}
 
 		Items.Clear();
 
@@ -616,8 +620,6 @@ public class Lego_Character : MonoBehaviour
 		}
 	}
 
-
-
 	public void FindAndClearRubble()
 	{
 		var shortestPath = this.ShortestPath(System_Script.ClearRubble, ExtraCommands.FindUnTargetedObjects);
@@ -647,6 +649,7 @@ public class Lego_Character : MonoBehaviour
 
 	public void StartDrillingProcess()
 	{
+		TaskChassis = TaskChassis.Drilling;
 		CurrentTask = CurrentJob.WalkingToDrill;
 		DistFromJob = float.MaxValue;
 	}
@@ -654,6 +657,7 @@ public class Lego_Character : MonoBehaviour
 	public void StartClearingProcess()
 	{
 		CurrentTask = CurrentJob.WalkingToRubble;
+		TaskChassis = TaskChassis.Sweeping;
 		DistFromJob = float.MaxValue;
 	}
 
@@ -691,5 +695,11 @@ public class Lego_Character : MonoBehaviour
 			GetComponent<NavMeshAgent>().SetPath(shortestPath);
 			StartDriverProcess();
 		}
+	}
+
+	public void MoveTo(Vector3 Dest)
+	{
+		//navMeshAgent_SC.SetDestination(Dest);
+		this.GetComponent<NavMeshAgent>().SetDestination(Dest);
 	}
 }
