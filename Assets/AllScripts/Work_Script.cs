@@ -107,6 +107,18 @@ public class Work_Script : MonoBehaviour
 
 	private void OnDestroy()
 	{
+		foreach (var unit in System_Script.AllWorkers)
+		{
+			var unit_ = unit.GetComponent<Lego_Character>();
+
+			if (unit_.TaskObject == this.gameObject)
+			{
+				unit_.TaskObject = null;
+				unit_.TaskChassis = TaskChassis.JWalking;
+				unit_.CurrentTask = CurrentJob.WalkToPoint;
+			}
+		}
+
 		if (GetComponent<Work_Script>().Worker != null)
 		{
 			ResetLegoUnit();

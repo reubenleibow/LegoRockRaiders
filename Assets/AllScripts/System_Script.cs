@@ -277,6 +277,7 @@ public partial class System_Script : MonoBehaviour
 	public void OnClick_Buid()
 	{
 		CurrentMenuBarNumber = 3;
+		Debug.Log("Build");
 	}
 
 	public void OnRightClick(RaycastHit Point)
@@ -321,6 +322,7 @@ public partial class System_Script : MonoBehaviour
 		{
 			var Unit_ = Unit.GetComponent<Lego_Character>();
 			Unit_.SetToDefault();
+			Unit_.Arrived = false;
 
 			if (TaskAvaliable)
 			{

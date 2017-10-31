@@ -126,14 +126,14 @@ public class Lego_Character : MonoBehaviour
 				IsDriverSeated_ = false;
 			}
 		}
-		if (Arrived && CurrentTask == CurrentJob.WanderAroungWithItem)
-		{
-			CurrentTask = CurrentJob.Nothing;
-		}
 
-		if (Arrived && CurrentTask == CurrentJob.WalkToPoint)
+		if (Arrived)
 		{
-			CurrentTask = CurrentJob.Nothing;
+			if(CurrentTask == CurrentJob.WanderAroungWithItem || CurrentTask == CurrentJob.WalkToPoint)
+			{
+				CurrentTask = CurrentJob.Nothing;
+				TaskChassis = TaskChassis.Nothing;
+			}
 		}
 
 		if (AddToSystem_Srpt.IsVehicle)
@@ -223,7 +223,7 @@ public class Lego_Character : MonoBehaviour
 			}
 
 			//arrived at a target
-			if (GetComponent<NavMeshAgent>().remainingDistance > 2)
+			if (GetComponent<NavMeshAgent>().remainingDistance > 2 && !Arrived)
 			{
 				Arrived = false;
 			}
@@ -387,7 +387,7 @@ public class Lego_Character : MonoBehaviour
 	public void FindNearestCollectableDropOff()
 	{
 		var set = false;
-
+		//If there is spot Open for stops then build
 		if (System_Script.ConstructionSites.Count > 0 && !set)
 		{
 			var shortestPath = this.ShortestPath(System_Script.ConstructionSites, ExtraCommands.R_Ore_Crystal);
@@ -404,9 +404,11 @@ public class Lego_Character : MonoBehaviour
 			{
 				set = true;
 				CurrentTask = CurrentJob.ConstructionWorker;
+				TaskChassis = TaskChassis.GatherStops;
 			}
 		}
 
+		//If there is no spots open for stops then pack away
 		if (SystemSrpt.TotalStopsNeeded <= 0 && !set && System_Script.AllStops.Count > 0)
 		{
 			var shortestPath = this.ShortestPath(System_Script.ListOfAllToolStores, ExtraCommands.ReturnCrystal);
@@ -496,7 +498,6 @@ public class Lego_Character : MonoBehaviour
 	{
 		if (Items[0].GetComponent<Collectable>().CollectableType == CollectableType.Stops)
 		{
-			//var parent = TaskObject.transform.parent;
 			TaskObject.GetComponent<Construction_Script>().Contained_Stops++;
 
 			System_Script.CollectableStops.Remove(Items[0]);

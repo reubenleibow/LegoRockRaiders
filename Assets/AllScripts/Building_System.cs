@@ -229,7 +229,7 @@ public class Building_System : MonoBehaviour
 			Ray ray0 = Camera.main.ScreenPointToRay(Input.mousePosition);
 			if (Physics.Raycast(ray0, out dest))
 			{
-				System_Script.OnClick_Back();
+				//System_Script.OnClick_Back();
 				System_Script.OnLeftClick(dest);
 			}
 
