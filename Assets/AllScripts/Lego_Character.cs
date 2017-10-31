@@ -151,7 +151,6 @@ public class Lego_Character : MonoBehaviour
 		if (TaskChassis == TaskChassis.IsDriving)
 		{
 			IsDriving = true;
-
 		}
 		else
 		{
@@ -546,6 +545,8 @@ public class Lego_Character : MonoBehaviour
 			Vehicle.GetComponent<Lego_Character>().DriverIsSeated = true;
 			run = false;
 		}
+
+		Arrived = false;
 	}
 
 	// this must be set by priorities

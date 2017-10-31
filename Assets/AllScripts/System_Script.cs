@@ -134,7 +134,7 @@ public partial class System_Script : MonoBehaviour
 			var SObject = SelectedGameObjects[0].GetComponent<AddToSystemList_Script>();
 			var SObject_Core = SelectedGameObjects[0].GetComponent<Lego_Character>();
 
-			if (SObject.IsRaider)
+			if (SObject.IsRaider && CurrentMenuBarNumber != 2)
 			{
 				ChangeMenu(2);
 			}
@@ -461,7 +461,6 @@ public partial class System_Script : MonoBehaviour
 			selectedGameObject.GetComponent<Work_Script>().WorkedOn = true;
 			ClearRubble.Add(selectedGameObject);
 		}
-
 		ChangeMenu(1);
 	}
 
@@ -522,12 +521,12 @@ public partial class System_Script : MonoBehaviour
 
 	public bool Is_NewMenu_Enabled()
 	{
-		if (CurrentMenuBarNumber == 3)
+		if (StartConstruction.BuildingSquareList.Count == 0)
 		{
-			return (false);
+			return (true);
 		}
 
-		return (true);
+		return (false);
 	}
 
 	public  bool Is_Selection_Enabled()

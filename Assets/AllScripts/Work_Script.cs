@@ -109,13 +109,17 @@ public class Work_Script : MonoBehaviour
 	{
 		foreach (var unit in System_Script.AllWorkers)
 		{
-			var unit_ = unit.GetComponent<Lego_Character>();
-
-			if (unit_.TaskObject == this.gameObject)
+			if (unit != null)
 			{
-				unit_.TaskObject = null;
-				unit_.TaskChassis = TaskChassis.JWalking;
-				unit_.CurrentTask = CurrentJob.WalkToPoint;
+				var unit_ = unit.GetComponent<Lego_Character>();
+
+				if (unit_.TaskObject == this.gameObject)
+				{
+					unit_.TaskObject = null;
+					unit_.TaskChassis = TaskChassis.JWalking;
+					unit_.CurrentTask = CurrentJob.WalkToPoint;
+				}
+
 			}
 		}
 
