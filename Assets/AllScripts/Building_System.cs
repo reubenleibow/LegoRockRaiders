@@ -87,28 +87,28 @@ public class Building_System : MonoBehaviour
 	{
 		if (CurrentBuildingType == BuildingTypes.Rubble)
 		{
-			System_Script.CurrentMenuBarNumber = 5;
+			System_Script.ChangeMenu(5);
 			System_Script.selectedGameObject = CurrentObject;
 		}
 
 		if (CurrentBuildingType == BuildingTypes.Nothing)
 		{
-			System_Script.CurrentMenuBarNumber = 5;
+			System_Script.ChangeMenu(5);
 		}
 
 		if (CurrentBuildingType == BuildingTypes.PowerPathBegin)
 		{
-			System_Script.CurrentMenuBarNumber = 6;
+			System_Script.ChangeMenu(6);
 		}
 
 		if (CurrentBuildingType == BuildingTypes.Building)
 		{
-			System_Script.CurrentMenuBarNumber = 6;
+			System_Script.ChangeMenu(6);
 		}
 
 		if (CurrentBuildingType == BuildingTypes.PlaceHolder)
 		{
-			System_Script.CurrentMenuBarNumber = 1;
+			System_Script.ChangeMenu(1);
 		}
 	}
 
@@ -135,7 +135,7 @@ public class Building_System : MonoBehaviour
 		BuildingGrid[Clicked_X, Clicked_Z].Object = newPowerPath;
 		BuildingGrid[Clicked_X, Clicked_Z].B_Types = BuildingTypes.PowerPathBegin;
 
-		System_Script.CurrentMenuBarNumber = 1;
+		System_Script.ChangeMenu(1);
 	}
 
 	public void On_Click_CancelBuilding()
@@ -182,7 +182,7 @@ public class Building_System : MonoBehaviour
 
 		FullReset(Clicked_X, Clicked_Z);
 
-		System_Script.CurrentMenuBarNumber = 1;
+		System_Script.ChangeMenu(1);
 	}
 
 	public void FullReset(int X, int Z)
@@ -223,13 +223,12 @@ public class Building_System : MonoBehaviour
 			cancel = true;
 		}
 
-		if (!selecting)
+		if (!selecting && System_Script.Is_NewMenu_Enabled())
 		{
-
 			Ray ray0 = Camera.main.ScreenPointToRay(Input.mousePosition);
+
 			if (Physics.Raycast(ray0, out dest))
 			{
-				//System_Script.OnClick_Back();
 				System_Script.OnLeftClick(dest);
 			}
 
@@ -258,7 +257,6 @@ public class Building_System : MonoBehaviour
 				if (dest.collider.gameObject.transform.tag == "Terrain")
 				{
 					System_Script.selectedGameObject = null;
-					Debug.Log("Clear raider list");
 					System_Script.SelectedGameObjects.Clear();
 					OnterrainClick = true;
 
@@ -276,19 +274,17 @@ public class Building_System : MonoBehaviour
 			if (System_Script.selectedGameObject != null || System_Script.SelectedGameObjects.Count != 0)
 			{
 				SelectorSquare.SetActive(false);
-
 			}
 		}
-		else
-		{
-			SelectorSquare.SetActive(false);
 
-			if (System_Script.SelectedGameObjects.Count == 0)
-			{
+		//if (selecting && System_Script.Is_NewMenu_Enabled())
+		//{
+		//	SelectorSquare.SetActive(false);
 
-				System_Script.OnClick_Back();
-			}
-
-		}
+		//	if (System_Script.SelectedGameObjects.Count == 0)
+		//	{
+		//		System_Script.OnClick_Back();
+		//	}
+		//}
 	}
 }

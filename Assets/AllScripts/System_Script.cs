@@ -67,34 +67,37 @@ public partial class System_Script : MonoBehaviour
 
 	public Building_System Building_System;
 	public int TotalStopsNeeded = 0;
-
+	public StartConstruction StartConstruction;
 
 	void Start()
 	{
 		Game_Script = this.GetComponent<Game_Script>();
 		Icon_Script = this.GetComponent<IconEdit_Script>();
 		Building_System = this.GetComponent<Building_System>();
+		StartConstruction = this.GetComponent<StartConstruction>();
 
 		Initialise();
 	}
 
 	void Update()
 	{
-		var overUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
-		var cancel = false;
+		var MouseIsOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
 
-		if (!overUI)
+		if (Input.GetMouseButtonDown(0) && !MouseIsOverUI)
 		{
-			cancel = true;
+			Building_System.CurrentBuildingType = BuildingTypes.Nothing;
+			Building_System.CurrentObject = null;
+			Building_System.SelectorSquare.SetActive(false);
+			DeSelectAll();
+			SelectedGameObjects.Clear();
 		}
 
-		//if (Input.GetMouseButtonDown(0) && cancel && SelectedGameObjects.Count> 0)
-		//{
-		//	OnClick_Back();
-		//}
-
 		GetTotalStops();
-		SelectObjects();
+
+		if (Is_Selection_Enabled())
+		{
+			SelectObjects();
+		}
 
 		foreach (var obj in AllSelectableGameObjects.ToArray())
 		{
@@ -133,22 +136,22 @@ public partial class System_Script : MonoBehaviour
 
 			if (SObject.IsRaider)
 			{
-				CurrentMenuBarNumber = 2;
+				ChangeMenu(2);
 			}
 
 			if (SObject.IsBuilding)
 			{
-				CurrentMenuBarNumber = 7;
+				ChangeMenu(7);
 			}
 
 			if (SObject.IsVehicle && !SObject_Core.DriverIsSeated)
 			{
-				CurrentMenuBarNumber = 10;
+				ChangeMenu(10);
 			}
 
 			if (SObject.IsVehicle && SObject_Core.Driver != null && SObject_Core.DriverIsSeated)
 			{
-				CurrentMenuBarNumber = 9;
+				ChangeMenu(9);
 			}
 		}
 
@@ -178,7 +181,7 @@ public partial class System_Script : MonoBehaviour
 			}
 		}
 
-		if(Input.GetMouseButtonUp(0))
+		if (Input.GetMouseButtonUp(0))
 		{
 			Building_System.OnMouseRelease(selecting);
 
@@ -267,17 +270,18 @@ public partial class System_Script : MonoBehaviour
 	{
 		Building_System.CurrentBuildingType = BuildingTypes.Nothing;
 		Building_System.CurrentObject = null;
-		CurrentMenuBarNumber = 1;
+		ChangeMenu(1);
 		Building_System.SelectorSquare.SetActive(false);
 
 		DeSelectAll();
 		SelectedGameObjects.Clear();
+
+		StartConstruction.OnBackClicked();
 	}
 
 	public void OnClick_Buid()
 	{
-		CurrentMenuBarNumber = 3;
-		Debug.Log("Build");
+		ChangeMenu(3);
 	}
 
 	public void OnRightClick(RaycastHit Point)
@@ -403,28 +407,31 @@ public partial class System_Script : MonoBehaviour
 		var Object = "";
 		Object = Point.transform.tag;
 
-		if (Object == "Rock")
-		{
-			taskable = true;
-			Object = Point.transform.tag;
-
-			selectedGameObject = Point.collider.transform.parent.gameObject;
-		}
-
-		//for objects with colliders below parents
-		if (taskable)
+		if (Is_NewMenu_Enabled())
 		{
 			if (Object == "Rock")
 			{
-				CurrentMenuBarNumber = 4;
+				taskable = true;
+				Object = Point.transform.tag;
 
-				if (selectedGameObject.GetComponent<Work_Script>().WorkedOn)
+				selectedGameObject = Point.collider.transform.parent.gameObject;
+			}
+
+			//for objects with colliders below parents
+			if (taskable)
+			{
+				if (Object == "Rock")
 				{
-					Icon_Script.Enable_Drill(false);
-				}
-				else
-				{
-					Icon_Script.Enable_Drill(true);
+					ChangeMenu(4);
+
+					if (selectedGameObject.GetComponent<Work_Script>().WorkedOn)
+					{
+						Icon_Script.Enable_Drill(false);
+					}
+					else
+					{
+						Icon_Script.Enable_Drill(true);
+					}
 				}
 			}
 		}
@@ -439,12 +446,12 @@ public partial class System_Script : MonoBehaviour
 			DrillRocks.Add(selectedGameObject);
 		}
 
-		CurrentMenuBarNumber = 1;
+		ChangeMenu(1);
 	}
 
 	public void Onclick_CreateSmallVehicle()
 	{
-		CurrentMenuBarNumber = 8;
+		ChangeMenu(8);
 	}
 
 	public void OnClick_ClearRubble()
@@ -455,7 +462,7 @@ public partial class System_Script : MonoBehaviour
 			ClearRubble.Add(selectedGameObject);
 		}
 
-		CurrentMenuBarNumber = 1;
+		ChangeMenu(1);
 	}
 
 	public void OnClick_Climbout()
@@ -511,5 +518,31 @@ public partial class System_Script : MonoBehaviour
 	{
 		foreach (var obj in AllSelectableGameObjects.ToArray())
 			obj.IsSelected = false;
+	}
+
+	public bool Is_NewMenu_Enabled()
+	{
+		if (CurrentMenuBarNumber == 3)
+		{
+			return (false);
+		}
+
+		return (true);
+	}
+
+	public  bool Is_Selection_Enabled()
+	{
+		if (StartConstruction.BuildingSquareList.Count == 0)
+		{
+			return (true);
+		}
+
+		return (false);
+	}
+
+	public void ChangeMenu(int Number)
+	{
+		CurrentMenuBarNumber = Number;
+		Debug.Log("ChangedMenu" + Number);
 	}
 }

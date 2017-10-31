@@ -13,7 +13,7 @@ public enum Type
 public class SelectCode : MonoBehaviour
 {
 	private bool isSelected;
-
+	public System_Script System_Script;
 	public bool Movable = false;
 	public Vector2 GameObjectCoordinates = Vector2.zero;
 	public Image HiSelection;
@@ -46,6 +46,7 @@ public class SelectCode : MonoBehaviour
 	void Start()
 	{
 		System_Script.AllSelectableGameObjects.Add(this);
+		System_Script = GameObject.Find("System").GetComponent<System_Script>();
 	}
 
 	void OnDestroy()
@@ -72,7 +73,7 @@ public class SelectCode : MonoBehaviour
 
 	public void OnMouseOver()
 	{
-		if (Input.GetMouseButtonUp(0))
+		if (Input.GetMouseButtonUp(0) && System_Script.Is_Selection_Enabled())
 		{
 			System_Script.SingleSelection(this);
 		}

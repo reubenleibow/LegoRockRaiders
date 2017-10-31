@@ -44,6 +44,8 @@ public class StartConstruction : MonoBehaviour
 	public GameObject BuildingSquare_G;
 	public GameObject ExtraPath;
 	public GameObject BasePath;
+	public bool PowerpathNextToPlans = false;
+	public bool OverlappingPlans = true;
 
 
 	public BuildingGroundType B_Type = BuildingGroundType.blank;
@@ -100,7 +102,7 @@ public class StartConstruction : MonoBehaviour
 		{
 			var Construction = new Construction_Script();
 
-			if (Input.GetMouseButtonDown(0))
+			if (Input.GetMouseButtonDown(0) && PowerpathNextToPlans && !OverlappingPlans)
 			{
 				var MainNewBuildSite = new GameObject();
 				var CurrentNewBuilding = new GameObject();
@@ -109,64 +111,64 @@ public class StartConstruction : MonoBehaviour
 
 				//Loops through the BuildingplansSquares to create the powerpaths for buildings
 
-				if(!cancel)
+				if (!cancel)
 				{
 
-				foreach (var square in BuildingSquareList.ToArray())
-				{
-					var name = square.Square.transform.name;
-					var Pos = square.Square.transform.position;
-					var PosX = (int)Pos.x / 12;
-					var PosZ = (int)Pos.z / 12;
-
-					if (name == "Y")
+					foreach (var square in BuildingSquareList.ToArray())
 					{
-						var newPath = Instantiate(BasePath, square.Square.transform.position, Quaternion.identity);
-						Construction = newPath.GetComponent<Construction_Script>();
-						CurrentNewBuilding = newPath;
+						var name = square.Square.transform.name;
+						var Pos = square.Square.transform.position;
+						var PosX = (int)Pos.x / 12;
+						var PosZ = (int)Pos.z / 12;
 
-						Construction.ConstructionType = ConstructionTypes;
-						Construction.Angle = BuildingAngle;
-
-						if (!Set)
+						if (name == "Y")
 						{
-							Construction.Required_Ore = OreForProject;
-							Construction.Required_Crystal = CrystalsForProject;
-							Construction.Required_Stops = StoprForProject;
+							var newPath = Instantiate(BasePath, square.Square.transform.position, Quaternion.identity);
+							Construction = newPath.GetComponent<Construction_Script>();
+							CurrentNewBuilding = newPath;
 
-							MainNewBuildSite = newPath;
-							MainNewBuildSite.transform.name = "TheBase";
-							Set = true;
+							Construction.ConstructionType = ConstructionTypes;
+							Construction.Angle = BuildingAngle;
+
+							if (!Set)
+							{
+								Construction.Required_Ore = OreForProject;
+								Construction.Required_Crystal = CrystalsForProject;
+								Construction.Required_Stops = StoprForProject;
+
+								MainNewBuildSite = newPath;
+								MainNewBuildSite.transform.name = "TheBase";
+								Set = true;
+							}
+							else
+							{
+								Construction.Fake = true;
+							}
+
+							BuildingStopsList.Add(Construction.StopPoint1);
+							BuildingStopsList.Add(Construction.StopPoint2);
+							BuildingStopsList.Add(Construction.StopPoint3);
+							BuildingStopsList.Add(Construction.StopPoint4);
 						}
-						else
+
+						if (name == "G")
 						{
-							Construction.Fake = true;
+							var newPath = Instantiate(ExtraPath, square.Square.transform.position, Quaternion.identity);
+							CurrentNewBuilding = newPath;
 						}
 
-						BuildingStopsList.Add(Construction.StopPoint1);
-						BuildingStopsList.Add(Construction.StopPoint2);
-						BuildingStopsList.Add(Construction.StopPoint3);
-						BuildingStopsList.Add(Construction.StopPoint4);
+						Building_System.BuildingGrid[PosX, PosZ].B_Types = BuildingTypes.Building;
+						Building_System.BuildingGrid[PosX, PosZ].Object = MainNewBuildSite;
+						Building_System.BuildingGrid[PosX, PosZ].Object.GetComponent<Construction_Script>().ExtraPaths.Add(CurrentNewBuilding);
 					}
-
-					if (name == "G")
-					{
-						var newPath = Instantiate(ExtraPath, square.Square.transform.position, Quaternion.identity);
-						CurrentNewBuilding = newPath;
-					}
-
-					Building_System.BuildingGrid[PosX, PosZ].B_Types = BuildingTypes.Building;
-					Building_System.BuildingGrid[PosX, PosZ].Object = MainNewBuildSite;
-					Building_System.BuildingGrid[PosX, PosZ].Object.GetComponent<Construction_Script>().ExtraPaths.Add(CurrentNewBuilding);
-				}
 				}
 
-				if(BuildingStopsList.Count > 0)
+				if (BuildingStopsList.Count > 0)
 				{
 					foreach (var stop1 in BuildingStopsList.ToArray())
 					{
 						var Pos1 = stop1.transform.position;
-						var VectorPos1 = new Vector3(Pos1.x,0, Pos1.z);
+						var VectorPos1 = new Vector3(Pos1.x, 0, Pos1.z);
 
 						foreach (var stop2 in BuildingStopsList.ToArray())
 						{
@@ -175,7 +177,7 @@ public class StartConstruction : MonoBehaviour
 
 							var distance = Vector3.Distance(VectorPos1, VectorPos2);
 
-							if(distance > 0 && distance < 6)
+							if (distance > 0 && distance < 6)
 							{
 								BuildingStopsList.Remove(stop1);
 								BuildingStopsList.Remove(stop2);
@@ -201,13 +203,14 @@ public class StartConstruction : MonoBehaviour
 			}
 		}
 	}
-	
+
 	//moving the buildingplans around
 	public void MousePositionOnTerrain(Vector3 Pos)
 	{
 		var MouseX = (Mathf.Round(Pos.x / 12)) * 12;
 		var MouseZ = (Mathf.Round(Pos.z / 12)) * 12;
-
+		var PowerpathNextToPlans_ = false;
+		var OverlappingPlans_ = false;
 
 		if (MousePosX == 0 && MousePosZ == 0)
 		{
@@ -244,32 +247,59 @@ public class StartConstruction : MonoBehaviour
 
 		foreach (var item in BuildingSquareList.ToArray())
 		{
+			var Object = item.Square;
+			var PoS_X = (int)Object.transform.position.x / 12;
+			var PoS_Z = (int)Object.transform.position.z / 12;
 			var X_ = item.X;
 			var Z_ = item.Z;
-			var Object = item.Square;
 			var XNew = item.X;
 			var ZNew = item.Z;
-			var TileObject = Building_System.BuildingGrid[(int)Object.transform.position.x/12, (int)Object.transform.position.z/12].B_Types;
-
+			var TileObject = Building_System.BuildingGrid[PoS_X, PoS_Z].B_Types;
 			var Name_ = item.Square.transform.name;
 
-			if(TileObject != BuildingTypes.Nothing)
+			if (TileObject != BuildingTypes.Nothing)
 			{
 				Object.transform.GetChild(1).GetComponent<Renderer>().material = System_Script.Red_1;
+				OverlappingPlans_ = true;
 			}
 			else
 			{
-				if(Object.transform.name == "Y")
+				if (Object.transform.name == "Y")
 				{
 					Object.transform.GetChild(1).GetComponent<Renderer>().material = System_Script.Yellow;
-
 				}
 
 				if (Object.transform.name == "G")
 				{
 					Object.transform.GetChild(1).GetComponent<Renderer>().material = System_Script.Green;
-
 				}
+			}
+			if (Building_System.BuildingGrid[PoS_X, PoS_Z + 1].B_Types == BuildingTypes.PowerPathComplete)
+			{
+				PowerpathNextToPlans_ = true;
+			}
+
+			if (PoS_Z - 1 > -1)
+			{
+				if (Building_System.BuildingGrid[PoS_X, PoS_Z - 1].B_Types == BuildingTypes.PowerPathComplete)
+				{
+					PowerpathNextToPlans_ = true;
+				}
+
+			}
+
+			if (Building_System.BuildingGrid[PoS_X + 1, PoS_Z].B_Types == BuildingTypes.PowerPathComplete)
+			{
+				PowerpathNextToPlans_ = true;
+			}
+
+			if (PoS_X - 1 > -1)
+			{
+				if (Building_System.BuildingGrid[PoS_X - 1, PoS_Z].B_Types == BuildingTypes.PowerPathComplete)
+				{
+					PowerpathNextToPlans_ = true;
+				}
+
 			}
 
 			if (ConstructionAngle == ConstructionAngle.Up)
@@ -296,6 +326,10 @@ public class StartConstruction : MonoBehaviour
 
 			item.Square.transform.position = new Vector3(MouseX + (XNew * 12), 0.15f, MouseZ + (ZNew * 12));
 		}
+
+		PowerpathNextToPlans = PowerpathNextToPlans_;
+		OverlappingPlans = OverlappingPlans_;
+
 
 		MousePosX = (int)MouseX;
 		MousePosZ = (int)MouseZ;

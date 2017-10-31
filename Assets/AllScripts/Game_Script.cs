@@ -159,7 +159,6 @@ public class Game_Script : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		//Debug.Log(RockGridNumbers[11, 7].RockShape & RockGridNumbers[11, 9].RockShape & RockGridNumbers[12, 8].RockShape & RockGridNumbers[10, 8].RockShape);
 	}
 
 	/// <summary>
