@@ -62,6 +62,7 @@ public class StartConstruction : MonoBehaviour
 
 	public GameObject systemObj;
 	public Building_System Building_System;
+	public System_Script System_Script;
 
 
 	// Use this for initialization
@@ -69,6 +70,7 @@ public class StartConstruction : MonoBehaviour
 	{
 		systemObj = GameObject.Find("System");
 		Building_System = systemObj.GetComponent<Building_System>();
+		System_Script = systemObj.GetComponent<System_Script>();
 	}
 
 	// Update is called once per frame
@@ -244,22 +246,31 @@ public class StartConstruction : MonoBehaviour
 		{
 			var X_ = item.X;
 			var Z_ = item.Z;
+			var Object = item.Square;
 			var XNew = item.X;
 			var ZNew = item.Z;
-			//var TileObject = Building_System.BuildingGrid[X_, Z_].B_Types;
-			//var Name_ = item.Square.transform.name;
+			var TileObject = Building_System.BuildingGrid[(int)Object.transform.position.x/12, (int)Object.transform.position.z/12].B_Types;
 
-			//if (TileObject == BuildingTypes.Nothing)
-			//{
-			//	if(Name_ == "Y")
-			//	{
-			//	//	item.Square
-			//	}
-			//}
-			//else
-			//{
+			var Name_ = item.Square.transform.name;
 
-			//}
+			if(TileObject != BuildingTypes.Nothing)
+			{
+				Object.transform.GetChild(1).GetComponent<Renderer>().material = System_Script.Red_1;
+			}
+			else
+			{
+				if(Object.transform.name == "Y")
+				{
+					Object.transform.GetChild(1).GetComponent<Renderer>().material = System_Script.Yellow;
+
+				}
+
+				if (Object.transform.name == "G")
+				{
+					Object.transform.GetChild(1).GetComponent<Renderer>().material = System_Script.Green;
+
+				}
+			}
 
 			if (ConstructionAngle == ConstructionAngle.Up)
 			{
@@ -283,7 +294,7 @@ public class StartConstruction : MonoBehaviour
 				ZNew = item.X * -1;
 			}
 
-			item.Square.transform.position = new Vector3(MouseX + (XNew * 12), 0.1f, MouseZ + (ZNew * 12));
+			item.Square.transform.position = new Vector3(MouseX + (XNew * 12), 0.15f, MouseZ + (ZNew * 12));
 		}
 
 		MousePosX = (int)MouseX;
