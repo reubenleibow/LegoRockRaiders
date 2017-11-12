@@ -212,70 +212,70 @@ public class Building_System : MonoBehaviour
 
 	}
 
-	public void OnMouseRelease(bool selecting)
-	{
-		RaycastHit dest;
-		var cancel = false;
-		var overUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+	//public void OnMouseRelease(bool selecting , bool StartClickUI, bool EndClickUI)
+	//{
+		//RaycastHit dest;
+		//var cancel = false;
+		//var overUI = EndClickUI;
 
-		if (overUI)
-		{
-			cancel = true;
-		}
+		//if (overUI)
+		//{
+		//	cancel = true;
+		//}
 
-		if (!selecting && System_Script.Is_NewMenu_Enabled())
-		{
-			Ray ray0 = Camera.main.ScreenPointToRay(Input.mousePosition);
+		//if (!selecting && System_Script.Is_NewMenu_Enabled())
+		//{
+		//	Ray ray0 = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-			if (Physics.Raycast(ray0, out dest))
-			{
-				System_Script.OnLeftClick(dest);
-			}
+			//if (Physics.Raycast(ray0, out dest))
+			//{
+			//	System_Script.OnLeftClick(dest);
+			//}
 
-			if (Physics.Raycast(ray0, out dest))
-			{
-				if (dest.collider.gameObject.transform.tag == "Rock")
-				{
-					cancel = true;
-				}
-			}
+			//if (Physics.Raycast(ray0, out dest))
+			//{
+			//	if (dest.collider.gameObject.transform.tag == "Rock")
+			//	{
+			//		cancel = true;
+			//	}
+			//}
 
-			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			var OnterrainClick = false;
+			//Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			//var OnterrainClick = false;
 
-			if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")) && !cancel)
-			{
-				var P = dest.point;
-				var X_ = (Mathf.Round(P.x / SelectorSize)) * SelectorSize;
-				var Z_ = (Mathf.Round(P.z / SelectorSize)) * SelectorSize;
+			//if (Physics.Raycast(ray, out dest, float.MaxValue, LayerMask.GetMask("Terrain")) && !cancel)
+			//{
+			//	var P = dest.point;
+			//	var X_ = (Mathf.Round(P.x / SelectorSize)) * SelectorSize;
+			//	var Z_ = (Mathf.Round(P.z / SelectorSize)) * SelectorSize;
 
-				Clicked_X = (int)X_ / SelectorSize;
-				Clicked_Z = (int)Z_ / SelectorSize;
+			//	Clicked_X = (int)X_ / SelectorSize;
+			//	Clicked_Z = (int)Z_ / SelectorSize;
 
-				SelectorSquare.transform.position = new Vector3(X_, 0.1f, Z_);
+			//	SelectorSquare.transform.position = new Vector3(X_, 0.1f, Z_);
 
-				if (dest.collider.gameObject.transform.tag == "Terrain")
-				{
-					System_Script.selectedGameObject = null;
-					System_Script.SelectedGameObjects.Clear();
-					OnterrainClick = true;
+			//	if (dest.collider.gameObject.transform.tag == "Terrain")
+			//	{
+			//		System_Script.selectedGameObject = null;
+			//		System_Script.SelectedGameObjects.Clear();
+			//		OnterrainClick = true;
 
-					CurrentBuildingType = BuildingGrid[Clicked_X, Clicked_Z].B_Types;
-					CurrentObject = BuildingGrid[Clicked_X, Clicked_Z].Object;
+			//		CurrentBuildingType = BuildingGrid[Clicked_X, Clicked_Z].B_Types;
+			//		CurrentObject = BuildingGrid[Clicked_X, Clicked_Z].Object;
 
-					On_Click();
-				}
-			}
+			//		On_Click();
+			//	}
+			//}
 
-			if (System_Script.selectedGameObject == null && System_Script.SelectedGameObjects.Count == 0 && OnterrainClick)
-			{
-				SelectorSquare.SetActive(true);
-			}
-			if (System_Script.selectedGameObject != null || System_Script.SelectedGameObjects.Count != 0)
-			{
-				SelectorSquare.SetActive(false);
-			}
-		}
+			//if (System_Script.selectedGameObject == null && System_Script.SelectedGameObjects.Count == 0 && OnterrainClick)
+			//{
+			//	SelectorSquare.SetActive(true);
+			//}
+			//if (System_Script.selectedGameObject != null || System_Script.SelectedGameObjects.Count != 0)
+			//{
+			//	SelectorSquare.SetActive(false);
+			//}
+		//}
 
 		//if (selecting && System_Script.Is_NewMenu_Enabled())
 		//{
@@ -286,5 +286,5 @@ public class Building_System : MonoBehaviour
 		//		System_Script.OnClick_Back();
 		//	}
 		//}
-	}
+	//}
 }

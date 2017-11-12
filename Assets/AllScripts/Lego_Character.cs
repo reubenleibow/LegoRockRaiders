@@ -82,7 +82,7 @@ public class Lego_Character : MonoBehaviour
 	public GameObject DriverSeat;
 	public GameObject Vehicle;
 
-	private int DrillStrength = 50;
+	private int DrillStrength = 10;
 	public bool Arrived = false;
 
 	//Current Tasks(No changes doen here)
@@ -127,13 +127,11 @@ public class Lego_Character : MonoBehaviour
 			}
 		}
 
-		if (Arrived)
+
+
+		if (CurrentTask == CurrentJob.WalkToPoint)
 		{
-			if(CurrentTask == CurrentJob.WanderAroungWithItem || CurrentTask == CurrentJob.WalkToPoint)
-			{
-				CurrentTask = CurrentJob.Nothing;
-				TaskChassis = TaskChassis.Nothing;
-			}
+			DistFromJob = this.GetComponent<NavMeshAgent>().remainingDistance;
 		}
 
 		if (AddToSystem_Srpt.IsVehicle)
@@ -219,12 +217,6 @@ public class Lego_Character : MonoBehaviour
 			if (CurrentTask == CurrentJob.Nothing && TaskChassis != TaskChassis.JWalking)
 			{
 				SetNextJob();
-			}
-
-			//arrived at a target
-			if (GetComponent<NavMeshAgent>().remainingDistance > 2 && !Arrived)
-			{
-				Arrived = false;
 			}
 
 			//detecting if the rock that the raider must mine is in range using ray caster method
@@ -347,6 +339,13 @@ public class Lego_Character : MonoBehaviour
 			if (Arrived == false && GetComponent<NavMeshAgent>().remainingDistance < 2)
 			{
 				Arrived = true;
+
+				if (CurrentTask == CurrentJob.WanderAroungWithItem || CurrentTask == CurrentJob.WalkToPoint)
+				{
+					CurrentTask = CurrentJob.Nothing;
+					TaskChassis = TaskChassis.Nothing;
+				}
+
 				ArrivedAtDest();
 			}
 		}
@@ -523,6 +522,7 @@ public class Lego_Character : MonoBehaviour
 	public void ArrivedAtDest()
 	{
 		var run = true;
+		//this.GetComponent<NavMeshAgent>().ResetPath();
 
 		//if the player is wandering with an Item in hand and has reched the end of its journey set by player then find a place to drop it off
 		if (CurrentTask == CurrentJob.WanderAroungWithItem && ItemType != CollectableType.Nothing && run)
@@ -532,10 +532,10 @@ public class Lego_Character : MonoBehaviour
 			run = false;
 		}
 
-		//if the player is jwalking and has no task then find a job once arrived
-		if (TaskChassis == TaskChassis.JWalking && run && CurrentTask == CurrentJob.Nothing)
+		if ((TaskChassis == TaskChassis.JWalking || CurrentTask == CurrentJob.WalkToPoint) && run)
 		{
 			TaskChassis = TaskChassis.Nothing;
+			CurrentTask = CurrentJob.Nothing;
 			run = false;
 		}
 
@@ -709,5 +709,13 @@ public class Lego_Character : MonoBehaviour
 	{
 		//navMeshAgent_SC.SetDestination(Dest);
 		this.GetComponent<NavMeshAgent>().SetDestination(Dest);
+	}
+
+	public void OnDestroy()
+	{
+		if(System_Script.SelectedGameObjects.Contains(this.gameObject.GetComponent<SelectCode>()))
+		{
+			System_Script.SelectedGameObjects.Remove(this.gameObject.GetComponent<SelectCode>());
+		}
 	}
 }

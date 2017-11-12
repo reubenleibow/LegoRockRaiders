@@ -76,94 +76,53 @@ public class Game_Script : MonoBehaviour
 	{
 		Building_System = this.GetComponent<Building_System>();
 
-		for (int iX = 0; iX < Rows; iX++)
-		{
-			for (int iY = 0; iY < Columns; iY++)
-			{
-				RockGridNumbers[iX, iY] = new GridPos { X = iX, Y = iY };
-			}
-		}
-
 		var map2 = Resources.Load("map2") as Texture2D;
+		//basically set all spaces that should have a rock a rock.
 		for (int y = 0; y < Columns && y < map2.height; y++)
 		{
 			for (int x = 0; x < Rows && x < map2.width; x++)
 			{
-				var rock = map2.GetPixel(x, y);
+				var CurrentPixelColour = map2.GetPixel(x, y);
+				RockGridNumbers[x, y] = new GridPos { X = x, Y = y };
 
-				if (rock != Color.white)
+				if (CurrentPixelColour == Color.white)
 				{
-					if (rock == Color.black)
-					{
-						RockGridNumbers[x, y].RockType = RockType.HardRock;
-					}
-					if (rock == Color.red)
-					{
-						RockGridNumbers[x, y].RockType = RockType.LooseRock;
-					}
-					if (rock == new Color(1, 1, 0))
-					{
-						RockGridNumbers[x, y].RockType = RockType.SoftRock;
-					}
-
-					//Building_System.BuildingGrid[x,y].Object = this.gameObject;
-					//Building_System.BuildingGrid[x, y].B_Types = BuildingTypes.Rock;
-
+					RockGridNumbers[x, y].RockType = RockType.None;
+				}
+				else
+				{
+					RockGridNumbers[x, y].RockType = RockType.SoftRock;
 				}
 			}
 		}
-
-		//var map = Resources.Load("map");
-		//var lines = map.ToString().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-		//for (int y = 0; y < Columns && y < lines.Length; y++)
-		//{
-		//	var line = lines[y];
-		//	for (int x = 0; x < Rows && x < line.Length; x++)
-		//	{
-		//		var rock = line[x].ToString();
-		//		RockGridNumbers[x, y].RockType = (RockType)int.Parse(rock);
-		//	}
-		//}
-
-		//for (int X = 1; X < 3; X++)
-		//{
-		//	for (int Y = 1; Y < 3; Y++)
-		//	{
-		//		//var NewRock = Instantiate(Rock,new Vector3(RockWidth*X, RockHeight, RockWidth*Y), Quaternion.identity);
-		//		RockGridNumbers[X, Y].RockType = RockType.HardRock;
-		//		//	RockGridNumbers[X, Y] = new GridPos { X = X, Y = Y, RockType = RockType.HardRock };
-
-		//	}
-		//}
-
-		//RockGridNumbers[3, 3].RockType = RockType.HardRock;
-		//RockGridNumbers[3, 4].RockType = RockType.HardRock;
-		//RockGridNumbers[3, 5].RockType = RockType.HardRock;
-		//RockGridNumbers[3, 6].RockType = RockType.HardRock;
-
-		//RockGridNumbers[4, 3].RockType = RockType.HardRock;
-		//RockGridNumbers[4, 4].RockType = RockType.HardRock;
-		//RockGridNumbers[4, 5].RockType = RockType.HardRock;
-		//RockGridNumbers[4, 6].RockType = RockType.HardRock;
-
-		//RockGridNumbers[5, 3].RockType = RockType.HardRock;
-		//RockGridNumbers[5, 4].RockType = RockType.HardRock;
-		//RockGridNumbers[5, 5].RockType = RockType.HardRock;
-		//RockGridNumbers[5, 6].RockType = RockType.HardRock;
-
+		RemoveOutStandingRocks(0, Rows, 0, Columns);
 		ResetRockMeshes(0, Rows, 0, Columns);
-
-		
 	}
 
-	// Update is called once per frame
 	void Update()
 	{
 	}
 
+	public void RemoveOutStandingRocks(int MinX, int MaxX, int MinY, int MaxY)
+	{
+		for (int X = MinX; X < MaxX; X++)
+		{
+			for (int Y = MinY; Y < MaxY; Y++)
+			{
+				var curr = RockGridNumbers[X, Y];
+				UpdateAdjacentRocks(X, Y);
+
+				if (curr.AdjacentRocks <= 1)
+				{
+					curr.RockShape = RockShape.None;
+					curr.RockType = RockType.None;
+				}
+			}
+		}
+	}
+
 	/// <summary>
-	/// Looks at the array `RockGridNumbers` and places the correct mesh
-	/// objects in the world.
+	/// Looks at the array so far(rock or not) and gives them a more accurate name as well as removing all the rocks that are on its own.
 	/// </summary>
 	public void ResetRockMeshes(int MinX, int MaxX, int MinY, int MaxY)
 	{
@@ -172,15 +131,11 @@ public class Game_Script : MonoBehaviour
 			for (int Y = MinY; Y < MaxY; Y++)
 			{
 				var curr = RockGridNumbers[X, Y];
+				var old = RockGridNumbers[X, Y].RockShape;
 				var Up = (Y <= 0) ? RockType.None : RockGridNumbers[X, Y - 1].RockType;
 				var Down = (Y >= Columns - 1) ? RockType.None : RockGridNumbers[X, Y + 1].RockType;
 				var Left = (X <= 0) ? RockType.None : RockGridNumbers[X - 1, Y].RockType;
 				var Right = (X >= Rows - 1) ? RockType.None : RockGridNumbers[X + 1, Y].RockType;
-
-				// set the number of rocks next to this one
-				UpdateAdjacentRocks(X, Y);
-
-
 
 				// set the rock shape
 				if (Up == RockType.None)
@@ -210,15 +165,11 @@ public class Game_Script : MonoBehaviour
 				{
 					curr.RockShape = RockShape.Square;
 				}
-
 				// create rock mesh
-				if (curr.RockType != RockType.None)
+				if (curr.RockType != RockType.None && curr.RockShape != old)
 				{
-
 					RecreateRockMesh(X, Y);
 				}
-
-				
 			}
 		}
 
@@ -258,14 +209,6 @@ public class Game_Script : MonoBehaviour
 				}
 			}
 		}
-
-		//if (X == 11 && Y == 8)
-		//{
-
-
-		//}
-
-		//ReUpdateRocks(0, MaxX, 0, MaxY);
 	}
 
 	/// <summary>
@@ -274,6 +217,12 @@ public class Game_Script : MonoBehaviour
 	public void RecreateRockMesh(int X, int Y)
 	{
 		var curr = RockGridNumbers[X, Y];
+		float oldHealth = 0.0f;
+
+		if(curr.gameObj != null)
+		{
+			oldHealth = curr.gameObj.GetComponent<Work_Script>().Health;
+		}
 
 		if (curr.gameObj != null)
 		{
@@ -357,16 +306,17 @@ public class Game_Script : MonoBehaviour
 		}
 
 		curr.gameObj.GetComponent<Work_Script>().RockProperties = curr;
-		//curr.gameObj.GetComponent<Work_Script>().Shape = curr.RockShape;
+
+		if(oldHealth > 0)
+		{
+			curr.gameObj.GetComponent<Work_Script>().Health = oldHealth;
+		}
 
 
 	}
 
 	public void OnDestroyRock(GridPos rock)
 	{
-
-		//this.GetComponent<System_Script>().OnRockDestroyed(rock.gameObj);
-
 		// destroy current rock
 		EraseRock(rock.X, rock.Y);
 
@@ -377,7 +327,6 @@ public class Game_Script : MonoBehaviour
 		var MaxY = rock.Y + 2;
 
 		ResetRockMeshes(MinX, MaxX, MinY, MaxY);
-
 	}
 
 	/// <summary>

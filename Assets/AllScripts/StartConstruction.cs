@@ -98,11 +98,15 @@ public class StartConstruction : MonoBehaviour
 		}
 
 		//at the moment it is only used as a power path creator for plans
+		
+	}
+	public void OnClick_Left_Down(bool MouseOverUI)
+	{
 		if (B_Type != BuildingGroundType.blank)
 		{
 			var Construction = new Construction_Script();
 
-			if (Input.GetMouseButtonDown(0) && PowerpathNextToPlans && !OverlappingPlans)
+			if (PowerpathNextToPlans && !OverlappingPlans)
 			{
 				var MainNewBuildSite = new GameObject();
 				var CurrentNewBuilding = new GameObject();
@@ -110,10 +114,8 @@ public class StartConstruction : MonoBehaviour
 				BuildingStopsList.Clear();
 
 				//Loops through the BuildingplansSquares to create the powerpaths for buildings
-
-				if (!cancel)
+				if (!MouseOverUI)
 				{
-
 					foreach (var square in BuildingSquareList.ToArray())
 					{
 						var name = square.Square.transform.name;

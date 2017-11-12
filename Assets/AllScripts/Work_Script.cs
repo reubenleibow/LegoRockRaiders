@@ -150,13 +150,12 @@ public class Work_Script : MonoBehaviour
 
 			if (Type == ObjectType.Rock)
 			{
+				Game_Script.OnDestroyRock(RockProperties);
 				var Rubble = Instantiate(System_.GetComponent<System_Script>().Rubble, new Vector3(POS.x, 0.1f, POS.z), Quaternion.identity);
 				Building_System.BuildingGrid[X, Y].B_Types = BuildingTypes.Rubble;
 				Building_System.BuildingGrid[X, Y].Object = Rubble;
 				Rubble.GetComponent<Work_Script>().X = X;
 				Rubble.GetComponent<Work_Script>().Y = Y;
-
-
 			}
 		}
 

@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public enum Type
+public enum UnitType
 {
 	Man,
 	Building,
@@ -19,7 +19,7 @@ public class SelectCode : MonoBehaviour
 	public Image HiSelection;
 	public float HiSelectionBoxSize = 40;
 	public bool Selectable = true;
-	public Type ObjectType = Type.Man;
+	public UnitType ObjectType = UnitType.Man;
 	public bool IsSelected
 	{
 		get { return isSelected; }

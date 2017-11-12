@@ -29,6 +29,7 @@ public partial class System_Script : MonoBehaviour
 	public static List<GameObject> CollectableOre = new List<GameObject>();
 	public static List<GameObject> CollectableCrystals = new List<GameObject>();
 	public static List<GameObject> CollectableStops = new List<GameObject>();
+	public GameObject Light_;
 
 
 	public List<Image> Images = new List<Image>();
@@ -44,7 +45,7 @@ public partial class System_Script : MonoBehaviour
 	public Image SelectionBoxImage;
 	public Image HighlightedSelection;
 
-	public Type FocusedObject = Type.Nothing;
+	public UnitType FocusedObject = UnitType.Nothing;
 
 	public GameObject Toolstore;
 	public GameObject Lego_Raider;
@@ -68,6 +69,7 @@ public partial class System_Script : MonoBehaviour
 	public Building_System Building_System;
 	public int TotalStopsNeeded = 0;
 	public StartConstruction StartConstruction;
+	public bool StartClickUI = false;
 
 	void Start()
 	{
@@ -83,14 +85,19 @@ public partial class System_Script : MonoBehaviour
 	{
 		var MouseIsOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
 
-		if (Input.GetMouseButtonDown(0) && !MouseIsOverUI)
+		if (Input.GetMouseButtonDown(0))
 		{
-			Building_System.CurrentBuildingType = BuildingTypes.Nothing;
-			Building_System.CurrentObject = null;
-			Building_System.SelectorSquare.SetActive(false);
-			DeSelectAll();
-			SelectedGameObjects.Clear();
+			OnLeftClick(MouseIsOverUI);
+			StartConstruction.OnClick_Left_Down(MouseIsOverUI);
 		}
+
+		if (Input.GetMouseButtonUp(0))
+		{
+			OnMouseUpCalled(MouseIsOverUI);
+		}
+		var IMP = Input.mousePosition;
+		var MousePos = Camera.main.ScreenToWorldPoint(new Vector3(IMP.x, IMP.y+300, IMP.z));
+		//Light_.transform.position = new Vector3(MousePos.x,20, MousePos.z); 
 
 		GetTotalStops();
 
@@ -158,14 +165,79 @@ public partial class System_Script : MonoBehaviour
 		Update2();
 	}
 
+	public void OnMouseUpCalled(bool MouseIsOverUI)
+	{
+		RaycastHit dest;
+		var ScanDeeper = true;
+		var EndClickUI = MouseIsOverUI;
+
+		mouseScreenStart = Vector2.zero;
+		mouseScreenCurrent = Vector2.zero;
+		SelectionBoxImage.rectTransform.sizeDelta = Vector2.zero;
+
+		if (!MouseIsOverUI)
+		{
+			if (Is_NewMenu_Enabled() && !selecting)
+			{
+				// first scan the tops only
+				Ray ray0 = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+				if (Physics.Raycast(ray0, out dest))
+				{
+					OnLeftClick(dest);
+
+					if (dest.collider.gameObject.transform.tag == "Rock")
+					{
+						ScanDeeper = false;
+					}
+				}
+
+				if (ScanDeeper == true)
+				{
+					var SelectorSize = Building_System.SelectorSize;
+
+					if (Physics.Raycast(ray0, out dest, float.MaxValue, LayerMask.GetMask("Terrain")))
+					{
+						var P = dest.point;
+						var X_ = (Mathf.Round(P.x / SelectorSize)) * SelectorSize;
+						var Z_ = (Mathf.Round(P.z / SelectorSize)) * SelectorSize;
+						Building_System.Clicked_X = (int)X_ / SelectorSize;
+						Building_System.Clicked_Z = (int)Z_ / SelectorSize;
+
+						if (dest.collider.gameObject.transform.tag == "Terrain")
+						{
+							//DeSelectAll();
+
+							Building_System.SelectorSquare.transform.position = new Vector3(X_, 0.1f, Z_);
+							Building_System.CurrentBuildingType = Building_System.BuildingGrid[Building_System.Clicked_X, Building_System.Clicked_Z].B_Types;
+							Building_System.CurrentObject = Building_System.BuildingGrid[Building_System.Clicked_X, Building_System.Clicked_Z].Object;
+							Building_System.SelectorSquare.SetActive(true);
+
+							Building_System.On_Click();
+						}
+					}
+				}
+			}
+		}
+
+		selecting = false;
+	}
+
+	public void OnLeftClick(bool MouseIsOverUI)
+	{
+		mouseScreenStart = Input.mousePosition;
+		StartClickUI = MouseIsOverUI;
+
+		if (!MouseIsOverUI)
+		{
+			DeSelectAll();
+		}
+	}
+
 	private void SelectObjects()
 	{
 		float selectingDistance;
 		//Drag Box Selection
-		if (Input.GetMouseButtonDown(0))
-		{
-			mouseScreenStart = Input.mousePosition;
-		}
 
 		if (Input.GetMouseButton(0))
 		{
@@ -179,16 +251,6 @@ public partial class System_Script : MonoBehaviour
 					selecting = true;
 				}
 			}
-		}
-
-		if (Input.GetMouseButtonUp(0))
-		{
-			Building_System.OnMouseRelease(selecting);
-
-			selecting = false;
-			mouseScreenStart = Vector2.zero;
-			mouseScreenCurrent = Vector2.zero;
-			SelectionBoxImage.rectTransform.sizeDelta = Vector2.zero;
 		}
 
 		if (selecting)
@@ -234,16 +296,6 @@ public partial class System_Script : MonoBehaviour
 			}
 			OnRightClick(dest);
 		}
-
-		if (Input.GetMouseButtonDown(0))
-		{
-			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-			if (Physics.Raycast(ray, out dest))
-			{
-				//OnLeftClick(dest);
-			}
-		}
 	}
 
 	public static void SingleSelection(SelectCode obj)
@@ -274,8 +326,6 @@ public partial class System_Script : MonoBehaviour
 		Building_System.SelectorSquare.SetActive(false);
 
 		DeSelectAll();
-		SelectedGameObjects.Clear();
-
 		StartConstruction.OnBackClicked();
 	}
 
@@ -351,7 +401,6 @@ public partial class System_Script : MonoBehaviour
 				}
 
 				Unit_.MoveTo(Point.point);
-				Debug.Log("called");
 			}
 
 			if (Point.transform.tag == "Rubble")
@@ -422,15 +471,25 @@ public partial class System_Script : MonoBehaviour
 			{
 				if (Object == "Rock")
 				{
-					ChangeMenu(4);
+					var RockShape = selectedGameObject.GetComponent<Work_Script>().RockProperties.RockShape;
 
-					if (selectedGameObject.GetComponent<Work_Script>().WorkedOn)
+					if (RockShape != RockShape.Square && RockShape != RockShape.SquareBottomLeft && RockShape != RockShape.SquareBottomRight && RockShape != RockShape.SquareTopLeft && RockShape != RockShape.SquareTopRight)
 					{
-						Icon_Script.Enable_Drill(false);
+
+						ChangeMenu(4);
+
+						if (selectedGameObject.GetComponent<Work_Script>().WorkedOn)
+						{
+							Icon_Script.Enable_Drill(false);
+						}
+						else
+						{
+							Icon_Script.Enable_Drill(true);
+						}
 					}
 					else
 					{
-						Icon_Script.Enable_Drill(true);
+						ChangeMenu(1);
 					}
 				}
 			}
@@ -445,7 +504,6 @@ public partial class System_Script : MonoBehaviour
 			selectedGameObject.GetComponent<Work_Script>().WorkedOn = true;
 			DrillRocks.Add(selectedGameObject);
 		}
-
 		ChangeMenu(1);
 	}
 
@@ -516,7 +574,14 @@ public partial class System_Script : MonoBehaviour
 	public void DeSelectAll()
 	{
 		foreach (var obj in AllSelectableGameObjects.ToArray())
+		{
 			obj.IsSelected = false;
+		}
+		SelectedGameObjects.Clear();
+
+		Building_System.CurrentBuildingType = BuildingTypes.Nothing;
+		Building_System.CurrentObject = null;
+		Building_System.SelectorSquare.SetActive(false);
 	}
 
 	public bool Is_NewMenu_Enabled()
@@ -529,7 +594,7 @@ public partial class System_Script : MonoBehaviour
 		return (false);
 	}
 
-	public  bool Is_Selection_Enabled()
+	public bool Is_Selection_Enabled()
 	{
 		if (StartConstruction.BuildingSquareList.Count == 0)
 		{
@@ -542,6 +607,14 @@ public partial class System_Script : MonoBehaviour
 	public void ChangeMenu(int Number)
 	{
 		CurrentMenuBarNumber = Number;
-		Debug.Log("ChangedMenu" + Number);
+	}
+
+	public void TeleportUint()
+	{
+		foreach (var unit in SelectedGameObjects)
+		{
+			DropItem();
+			Destroy(unit);
+		}
 	}
 }
