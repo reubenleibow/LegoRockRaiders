@@ -69,15 +69,16 @@ public class Game_Script : MonoBehaviour
 	private Building_System Building_System;
 
 	public GridPos[,] RockGridNumbers = new GridPos[Rows, Columns];
-	//public int[,] RockGridObjects = new int[100, 100];
 
 	// Use this for initialization
 	void Start()
 	{
 		Building_System = this.GetComponent<Building_System>();
-
 		var map2 = Resources.Load("map2") as Texture2D;
+
 		//basically set all spaces that should have a rock a rock.
+
+		
 		for (int y = 0; y < Columns && y < map2.height; y++)
 		{
 			for (int x = 0; x < Rows && x < map2.width; x++)
@@ -349,6 +350,8 @@ public class Game_Script : MonoBehaviour
 				UpdateAdjacentRocks(X - 1, X + 1, Y - 1, Y + 1);
 			}
 		}
+
+		//Terrain.activeTerrain.BuildNavMesh();
 	}
 
 	/// <summary>

@@ -71,18 +71,35 @@ public partial class System_Script : MonoBehaviour
 	public StartConstruction StartConstruction;
 	public bool StartClickUI = false;
 
+	public Camera Cam1;
+	public Camera FPSCam;
+
+
 	void Start()
 	{
 		Game_Script = this.GetComponent<Game_Script>();
 		Icon_Script = this.GetComponent<IconEdit_Script>();
 		Building_System = this.GetComponent<Building_System>();
 		StartConstruction = this.GetComponent<StartConstruction>();
-
+		FPSCam.GetComponent<Camera>().enabled = false;
+		Cam1.GetComponent<Camera>().enabled = true;
 		Initialise();
 	}
 
 	void Update()
 	{
+		if(Input.GetKeyDown("q"))
+		{
+			FPSCam.GetComponent<Camera>().enabled = true;
+			Cam1.GetComponent<Camera>().enabled = false;
+		}
+
+		if (Input.GetKeyDown("e"))
+		{
+			FPSCam.GetComponent<Camera>().enabled = false;
+			Cam1.GetComponent<Camera>().enabled = true;
+		}
+
 		var MouseIsOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
 
 		if (Input.GetMouseButtonDown(0))
@@ -96,8 +113,6 @@ public partial class System_Script : MonoBehaviour
 			OnMouseUpCalled(MouseIsOverUI);
 		}
 		var IMP = Input.mousePosition;
-		var MousePos = Camera.main.ScreenToWorldPoint(new Vector3(IMP.x, IMP.y+300, IMP.z));
-		//Light_.transform.position = new Vector3(MousePos.x,20, MousePos.z); 
 
 		GetTotalStops();
 
@@ -175,6 +190,12 @@ public partial class System_Script : MonoBehaviour
 		mouseScreenCurrent = Vector2.zero;
 		SelectionBoxImage.rectTransform.sizeDelta = Vector2.zero;
 
+		float terrain_height_Z_up = 0;
+		float terrain_height_X_right = 0;
+		float terrain_height_Z_down = 0;
+		float terrain_height_X_left = 0;
+
+
 		if (!MouseIsOverUI)
 		{
 			if (Is_NewMenu_Enabled() && !selecting)
@@ -204,9 +225,14 @@ public partial class System_Script : MonoBehaviour
 						Building_System.Clicked_X = (int)X_ / SelectorSize;
 						Building_System.Clicked_Z = (int)Z_ / SelectorSize;
 
+
 						if (dest.collider.gameObject.transform.tag == "Terrain")
 						{
-							//DeSelectAll();
+							terrain_height_Z_up = Terrain.activeTerrain.SampleHeight(new Vector3(X_,0,Z_ + 6));
+							terrain_height_Z_down = Terrain.activeTerrain.SampleHeight(new Vector3(X_,0,Z_ - 6));
+							terrain_height_X_right = Terrain.activeTerrain.SampleHeight(new Vector3(X_ + 6, 0, Z_ ));
+							terrain_height_X_left = Terrain.activeTerrain.SampleHeight(new Vector3(X_ - 6, 0, Z_ ));
+							Debug.Log("Z+" + terrain_height_Z_up + "Z-" + terrain_height_Z_down + "X+" + terrain_height_X_right + "X-" + terrain_height_X_left);
 
 							Building_System.SelectorSquare.transform.position = new Vector3(X_, 0.1f, Z_);
 							Building_System.CurrentBuildingType = Building_System.BuildingGrid[Building_System.Clicked_X, Building_System.Clicked_Z].B_Types;
