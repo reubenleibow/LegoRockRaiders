@@ -174,7 +174,7 @@ public class Building_System : MonoBehaviour
 
 			if (WorkerScript.TaskObject == Object_)
 			{
-				item.GetComponent<Lego_Character>().DropOffTaskPointDestroyed = true;
+				item.GetComponent<Lego_Character>().ItemDropOffPointDestroyed();
 			}
 		}
 

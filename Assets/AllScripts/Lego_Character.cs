@@ -94,7 +94,6 @@ public class Lego_Character : MonoBehaviour
 	public ExtraCommands ExtraCommands = ExtraCommands.Nothing;
 
 	public CollectableType ItemType;
-	public bool DropOffTaskPointDestroyed = false;
 
 
 	public System_Script SystemSrpt;
@@ -126,8 +125,6 @@ public class Lego_Character : MonoBehaviour
 				IsDriverSeated_ = false;
 			}
 		}
-
-
 
 		if (CurrentTask == CurrentJob.WalkToPoint)
 		{
@@ -198,13 +195,17 @@ public class Lego_Character : MonoBehaviour
 			}
 		}
 
+		// if this is a workalbe raider
 		if (!AddToSystem_Srpt.IsVehicle && navMeshAgent_SC.enabled || (AddToSystem_Srpt.IsVehicle && DriverIsSeated && navMeshAgent_SC.enabled))
 		{
-			if (DropOffTaskPointDestroyed)
+			if(TaskObject != null)
 			{
-				TaskObject = null;
-				FindNearestCollectableDropOff();
-				DropOffTaskPointDestroyed = false;
+				var distance = Vector3.Distance(transform.position, TaskObject.transform.position);
+
+				if(distance <= 2)
+				{
+					ArrivedAtDest();
+				}
 			}
 
 			//if the user says that it has an item in hand but it does not the set defalut
@@ -280,50 +281,7 @@ public class Lego_Character : MonoBehaviour
 				{
 					ClearingRubble();
 				}
-				//place collectable at base
-				if (CurrentTask == CurrentJob.DropOffCollectable || CurrentTask == CurrentJob.ConstructionWorker)
-				{
-					var distance = Vector3.Distance(transform.position, TaskObject.transform.position);
-
-
-					//ore and crystal drop off
-					if (distance <= 2 && ItemType != CollectableType.Stops)
-					{
-						PutCollectableDownAtBase();
-					}
-
-					if (distance <= 2 && ItemType == CollectableType.Stops && TaskChassis == TaskChassis.PackAwwayJunk)
-					{
-						PutCollectableDownAtBase();
-					}
-
-					//stops drop off
-					if (ItemType == CollectableType.Stops && TaskChassis == TaskChassis.GatherStops)
-					{
-						var index = 0;
-
-						if (TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.Contains(this.gameObject))
-						{
-							//var StopPoint = new GameObject();
-
-							index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
-
-							if (index < TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints.Count)
-							{
-								var StopPoint = TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints[index];
-								var distanceToStop = Vector3.Distance(transform.position, StopPoint.transform.position);
-								this.GetComponent<NavMeshAgent>().SetDestination(StopPoint.transform.position);
-
-								if (distanceToStop <= 1)
-								{
-									placeStopDown();
-								}
-							}
-						}
-					}
-				}
 			}
-
 		}
 		if (UnSelectable)
 		{
@@ -339,13 +297,6 @@ public class Lego_Character : MonoBehaviour
 			if (Arrived == false && GetComponent<NavMeshAgent>().remainingDistance < 2)
 			{
 				Arrived = true;
-
-				if (CurrentTask == CurrentJob.WanderAroungWithItem || CurrentTask == CurrentJob.WalkToPoint)
-				{
-					CurrentTask = CurrentJob.Nothing;
-					TaskChassis = TaskChassis.Nothing;
-				}
-
 				ArrivedAtDest();
 			}
 		}
@@ -522,7 +473,55 @@ public class Lego_Character : MonoBehaviour
 	public void ArrivedAtDest()
 	{
 		var run = true;
-		//this.GetComponent<NavMeshAgent>().ResetPath();
+
+		if(CurrentTask == CurrentJob.DropOffCollectable || CurrentTask == CurrentJob.ConstructionWorker)
+		{
+			if (ItemType != CollectableType.Stops)
+			{
+				PutCollectableDownAtBase();
+			}
+		}
+
+		if (CurrentTask == CurrentJob.WalkToPoint && run)
+		{
+			CurrentTask = CurrentJob.Nothing;
+			TaskChassis = TaskChassis.Nothing;
+			run = false;
+		}
+
+		if (TaskChassis == TaskChassis.PackAwwayJunk )
+		{
+			if(ItemType == CollectableType.Stops && run)
+			{
+				PutCollectableDownAtBase();
+				run = false;
+			}
+		}
+
+		//stops drop off
+		//this contains both going to stop position and then to place
+		if (ItemType == CollectableType.Stops && TaskChassis == TaskChassis.GatherStops && run)
+		{
+			var index = 0;
+			run = false;
+
+			if (TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.Contains(this.gameObject))
+			{
+				index = TaskObject.GetComponent<Construction_Script>().Workerlist_Stops.IndexOf(this.gameObject);
+
+				if (index < TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints.Count)
+				{
+					var StopPoint = TaskObject.GetComponent<Construction_Script>().RequiredStopsListPoints[index];
+					var distanceToStop = Vector3.Distance(transform.position, StopPoint.transform.position);
+					this.GetComponent<NavMeshAgent>().SetDestination(StopPoint.transform.position);
+
+					if (distanceToStop <= 1)
+					{
+						placeStopDown();
+					}
+				}
+			}
+		}
 
 		//if the player is wandering with an Item in hand and has reched the end of its journey set by player then find a place to drop it off
 		if (CurrentTask == CurrentJob.WanderAroungWithItem && ItemType != CollectableType.Nothing && run)
@@ -707,7 +706,6 @@ public class Lego_Character : MonoBehaviour
 
 	public void MoveTo(Vector3 Dest)
 	{
-		//navMeshAgent_SC.SetDestination(Dest);
 		this.GetComponent<NavMeshAgent>().SetDestination(Dest);
 	}
 
@@ -717,5 +715,11 @@ public class Lego_Character : MonoBehaviour
 		{
 			System_Script.SelectedGameObjects.Remove(this.gameObject.GetComponent<SelectCode>());
 		}
+	}
+
+	public void ItemDropOffPointDestroyed()
+	{
+		TaskObject = null;
+		FindNearestCollectableDropOff();
 	}
 }

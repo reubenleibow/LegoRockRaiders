@@ -73,6 +73,8 @@ public partial class System_Script : MonoBehaviour
 
 	public Camera Cam1;
 	public Camera FPSCam;
+	public int RaiderQueSize = 0;
+	public GameObject testobject;
 
 
 	void Start()
@@ -94,10 +96,20 @@ public partial class System_Script : MonoBehaviour
 			Cam1.GetComponent<Camera>().enabled = false;
 		}
 
+		if(Input.GetKeyDown("r"))
+		{
+			Instantiate(testobject, ListOfAllToolStores[0].transform.position, Quaternion.identity);
+		}
+
 		if (Input.GetKeyDown("e"))
 		{
 			FPSCam.GetComponent<Camera>().enabled = false;
 			Cam1.GetComponent<Camera>().enabled = true;
+		}
+
+		if(RaiderQueSize > 0)
+		{
+			OnClick_CreateMan();
 		}
 
 		var MouseIsOverUI = UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
@@ -338,6 +350,12 @@ public partial class System_Script : MonoBehaviour
 	//create raiders
 	public void OnClick_CreateMan()
 	{
+		if(ListOfAllToolStores.Count > 0)
+		{
+			int random = Random.Range(0, ListOfAllToolStores.Count - 1);
+			ListOfAllToolStores[random].GetComponent<ToolStore_Script>().createmanque++;
+		}
+
 		if ((CreateRaiderQue + RaidersList.Count) < MaxRaiders)
 		{
 			CreateRaiderQue++;
